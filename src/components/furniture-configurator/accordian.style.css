@@ -1,0 +1,3 @@
+.accordian-width {
+    min-width: calc(100vw - 281px);
+}

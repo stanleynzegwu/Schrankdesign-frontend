@@ -1,0 +1,7 @@
+.sidebar-height { 
+    min-height: calc(100vh - 103px);
+}
+
+.layout-children-width{
+    width: calc(100vw - 221px);
+}

@@ -1,0 +1,18 @@
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  margin: 0; 
+}
+
+.css-11u53oe-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input.MuiSelect-select {
+  min-height: 0.4375em !important;
+
+}
+.css-qiwgdb.MuiSelect-select {
+  min-height: 0.4375em !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

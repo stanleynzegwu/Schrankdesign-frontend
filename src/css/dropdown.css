@@ -1,0 +1,48 @@
+.custom-select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-repeat: no-repeat;
+    background-image: url("../../public/images/furniture_configurator/Vector.png");
+    background-position-x: 100%;
+    background-position-y: 9px;
+  }
+  .custom-select-operation {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    position: relative;
+  }
+  .select-wrapper::before{
+    position: absolute;
+    content: '';
+    top: 11px;
+    right: 2px;
+    border-style: solid;
+    border-width: 11px;
+    border-left-color: transparent;
+    border-right-color: transparent;
+    border-top-color: black;
+    border-bottom-color: transparent;
+    z-index: 9;
+    pointer-events: none;
+  }
+  .select-wrapper-clicked::before {
+    position: absolute;
+    content: '';
+    top: 4px;
+    right: 8px;
+    border-style: solid;
+    border-width: 11px;
+    border-left-color: transparent;
+    border-right-color: #36695C;
+    border-top-color: transparent;
+    border-bottom-color: transparent;
+    z-index: 9;
+    pointer-events: none;
+  }
+  .custom-select option:checked {
+    /* background-color: red; */
+  }
+  .changeSelectStyle {
+    background-color: #f6f6f6 !important;
+    color:#36695C !important;
+  }
