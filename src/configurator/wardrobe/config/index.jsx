@@ -170,7 +170,6 @@ export default function Corner(props) {
   useEffect(() => {
     const getProduct = async () => {
       const { data, error } = await GetSingleProduct(configId);
-      console.log(data);
       if (data) {
         setProductInfo({
           name: data?.product?.name,

@@ -313,7 +313,7 @@ const productColor = {
 const imgBaseUrl = "https://storage.googleapis.com/schrankdesign-uploads";
 
 const DetailImag: React.FC<DetailImagProps> = ({ product, imagesIndex, pageLoading }) => {
-  console.log(product);
+  //   console.log(product);
   const [thumbsSwiper, setThumbsSwiper] = useState<SwiperClass | null>(null);
   const loading_img = "/images/loadingImg.jpg";
   const detailImg = [
@@ -329,7 +329,7 @@ const DetailImag: React.FC<DetailImagProps> = ({ product, imagesIndex, pageLoadi
 
   return (
     <>
-      <div className="w-full grid grid-rows-7 grid-cols-2 gap-2 lg:gap-4">
+      <div className="px-10 lg:w-full grid grid-rows-7 grid-cols-2 gap-2 lg:gap-4 max-h-[920px]">
         {/* Normal-Picture */}
         <div className="w-full row-span-4 col-span-2 grid grid-cols-3 grid-rows-2 gap-2 lg:gap-4">
           <div className="overflow-hidden col-span-2 row-span-2">

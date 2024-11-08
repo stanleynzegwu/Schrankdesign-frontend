@@ -484,6 +484,27 @@ body {
   }
 }
 
+.colorTooltip {
+  position: relative;
+}
+
+.colorTooltip::after {
+  content: '';
+  position: absolute;
+  left: 50%; /* Position it horizontally centered */
+  bottom: 100%; /* Position it above the tooltip */
+  margin-left: -10px; /* Center the arrow horizontally */
+  border-width: 10px; /* Create the arrow */
+  border-style: solid;
+  border-color: transparent transparent #D9D9D9 transparent; /* Color the arrow */
+}
+
+.colorTooltip.edge::after {
+  left: auto; /* Reset the default center alignment */
+  right: -6px; /* Align the arrow closer to the right edge */
+  margin-left: 0; /* Remove the default centering offset */
+}
+
 /* Image Tooltip */
 .tooltip {
   position: relative;

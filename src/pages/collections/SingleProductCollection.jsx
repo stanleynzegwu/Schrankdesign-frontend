@@ -169,12 +169,11 @@ const SingleProductCollection = () => {
   const [pageLoading, setPageLoading] = useState(false);
   const [bannerImage, setBannerImage] = useState(null);
   const [categoryProducts, setCategoryProducts] = useState(null);
-  console.log(categoryProducts);
+  // console.log(categoryProducts);
   const getCategory = async () => {
     setPageLoading(true);
-    console.log("slug", decodeURIComponent(slug));
+    // console.log("slug", decodeURIComponent(slug));
     const { data, error } = await GetSingleCategory(decodeURIComponent(slug));
-    console.log(data);
     if (data) {
       setTitle(data?.category?.name);
       if (data?.category?.bannerImage) {
@@ -266,7 +265,6 @@ const SingleProductCollection = () => {
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3 mt-5 md:mt-0 text-black">
           {categoryProducts &&
             categoryProducts.map((item, i) => {
-              console.log(item);
               return (
                 item?.active == true && (
                   <ProductTile
@@ -274,6 +272,7 @@ const SingleProductCollection = () => {
                     id={item?._id}
                     defaultImg={`${imgBaseUrl}/Produktbilder/${item?.categoryName}/${item?.name}/Main-Picture/${item?.name}_${item?.baseColor}_Main.avif`}
                     hoverImg={`${imgBaseUrl}/Produktbilder/${item?.categoryName}/${item?.name}/Main-Picture/${item?.name}_${item?.baseColor}_Hover.avif`}
+                    category={item?.categoryName}
                     name={item?.name}
                     rating={item?.rating}
                     subtitle={item?.subtitle}
