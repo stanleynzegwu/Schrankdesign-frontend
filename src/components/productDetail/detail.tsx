@@ -329,7 +329,7 @@ const DetailImag: React.FC<DetailImagProps> = ({ product, imagesIndex, pageLoadi
 
   return (
     <>
-      <div className="px-10 lg:w-full grid grid-rows-7 grid-cols-2 gap-2 lg:gap-4 max-h-[920px]">
+      <div className="lg:px-10 w-full grid grid-rows-7 grid-cols-2 gap-2 lg:gap-4 max-h-[920px]">
         {/* Normal-Picture */}
         <div className="w-full row-span-4 col-span-2 grid grid-cols-3 grid-rows-2 gap-2 lg:gap-4">
           <div className="overflow-hidden col-span-2 row-span-2">
