@@ -137,7 +137,6 @@ const ProductTile = ({
   minDimension,
   maxDimension,
   price,
-  buttonText,
   link,
   quantity,
   // configId

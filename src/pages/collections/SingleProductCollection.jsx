@@ -279,7 +279,6 @@ const SingleProductCollection = () => {
                     minDimension={item?.configSet.minWidth}
                     maxDimension={item?.configSet.maxWidth}
                     price={item?.price}
-                    buttonText="Add To Cart"
                     link={`/product/${item?.categoryName}/${item?.configId}`}
                   />
                 )
