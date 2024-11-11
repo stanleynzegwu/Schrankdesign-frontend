@@ -1,11 +1,11 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { Suspense, useEffect, useMemo, useState } from "react";
 import * as THREE from "three";
 import { FeetModel } from "./common/feet";
 import Config from "../../config";
 import useDimensionStore from "../zustand/dimensionStore";
-// import { useFBX, useGLTF } from "@react-three/drei";
+import { useFBX, useGLTF } from "@react-three/drei";
 import { useLoader } from "@react-three/fiber";
-import { FBXLoader } from "three-stdlib"; // GLTFLoader
+import { FBXLoader, GLTFLoader } from "three-stdlib";
 import { getFeetInfo } from "../utils/getInfo";
 
 const FeetGroup = React.memo(function FeetGroup() {
@@ -20,14 +20,13 @@ const FeetGroup = React.memo(function FeetGroup() {
   const setHangingSize = useDimensionStore.use.setHangingSize();
   const hangingSize = useDimensionStore.use.hangingSize();
   const withFeet = useDimensionStore.use.withFeet();
+
   const [feets, setFeets] = useState({});
 
   const feetInfo = useMemo(() => {
     return getFeetInfo(feet, width, feetIndex, feetListIndex);
   }, [feet, width, feetIndex, feetListIndex]);
-  // const [feetsInfo, setFeetsInfo] = useState({})
-
-  console.log(feetInfo)
+  const [feetsInfo, setFeetsInfo] = useState({})
 
   let model = feetInfo?.gltf ? useLoader(FBXLoader, feetInfo.gltf) : undefined;
   let middleModel = [];
@@ -62,6 +61,7 @@ const FeetGroup = React.memo(function FeetGroup() {
     <group>
       {modelScale !== undefined && withFeet && model !== undefined && (
         <>
+          //* Front Feet
           <FeetModel
             rotation={[0, (feets.offSet * Math.PI) / 180, 0]}
             scale={modelScale}
@@ -84,7 +84,7 @@ const FeetGroup = React.memo(function FeetGroup() {
             ]}
             offSet={[feets.xOffset, feets.yOffset, feets.zOffset]}
           />
-
+          //* Back Feet
           <FeetModel
             rotation={[0, (feets.offSet * Math.PI) / 180 + Math.PI * 3 / 2, 0]}
             scale={modelScale}
@@ -107,7 +107,7 @@ const FeetGroup = React.memo(function FeetGroup() {
             ]}
             offSet={[feets.xOffset, feets.yOffset, feets.zOffset]}
           />
-
+          //* middle Feet
           {middleModel.map((middle, index) => {
             return (
               <>

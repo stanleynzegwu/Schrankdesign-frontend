@@ -29,7 +29,7 @@ export default function Sidebar() {
   const [activeTab, setActiveTab] = useState(tab_data[0].value)
 
   return (
-    <div className="w-[402px] canvas-height border-[1px] border-[#d9d9d9] border-l-0 border-b-0 flex-none bg-[#F5F5F5]">
+    <div className="w-[402px] h-full border-[1px] border-[#d9d9d9] border-l-0 border-b-0 flex-none bg-[#F5F5F5]">
       <Tabs value={activeTab}>
         <TabsHeader
           className="bg-[#E5E5E5] h-[49px] bg-opacity-100 rounded-none"

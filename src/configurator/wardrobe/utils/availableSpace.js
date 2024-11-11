@@ -1,5 +1,7 @@
 import Config from "../../config"
 
+import useDimensionStore from "../zustand/dimensionStore";
+
 const getThickness = (type, drawerHeight, drawerTopDistance, depth) => {
   return type === Config.furnishing.type.shelf ||
     type === Config.furnishing.type.foldBottom ||
@@ -87,10 +89,10 @@ export const getBottom = (positionY, scaleY, type, topShelfDistance) => {
     bottom += Config.furnishing.shelf.thickness1
   }
 
-  return bottom
+  return bottom;
 }
 
-const getSpace = (
+const getSpace = ({
   result,
   elementsXInfo,
   elementsWidths,
@@ -108,34 +110,29 @@ const getSpace = (
   hanging,
   withFeet,
   withOutFeet
-) => {
-  const assets = []
+}) => {
+  const { shelf, glassBottom, drawer, internalDrawer, clothesRail, clothesLift, pantsPullout, door, flap, divider, foldBottom } = Config.furnishing.type;
+  const assets = [];
   original_assets?.forEach((origin) => {
-    if (!assets[origin.xIndex]) assets[origin.xIndex] = []
+    if (!assets[origin.xIndex]) assets[origin.xIndex] = [];
+    assets[origin.xIndex].push(origin);
+  });
 
-    assets[origin.xIndex].push(origin)
-  })
- 
-  // dragged asset type
-  const drag_type =
-    type === Config.furnishing.type.shelf ||
-      type === Config.furnishing.type.glassBottom
-      ? Config.furnishing.type.shelf
-      : type === Config.furnishing.type.drawer ||
-        type === Config.furnishing.type.internalDrawer
-        ? Config.furnishing.type.drawer
-        : type === Config.furnishing.type.clothesRail
-          ? Config.furnishing.type.clothesRail
-          : type === Config.furnishing.type.clothesLift
-            ? Config.furnishing.type.clothesLift
-            : type === Config.furnishing.type.pantsPullout
-              ? Config.furnishing.type.pantsPullout
-              : type === Config.furnishing.type.divider
-                ? Config.furnishing.type.divider
-                : type === Config.furnishing.type.door
-                  ? Config.furnishing.type.door
-                  : type === Config.furnishing.type.flap ?
-                    Config.furnishing.type.flap : "Other";
+  const drag_type = (() => {
+    switch (type) {
+      case shelf:
+      case glassBottom: return shelf;
+      case drawer:
+      case internalDrawer: return drawer;
+      case clothesRail: return clothesRail;
+      case clothesLift: return clothesLift;
+      case pantsPullout: return pantsPullout;
+      case divider: return divider;
+      case door: return door;
+      case flap: return flap;
+      default: return "Other";
+    }
+  })();
 
 
   for (let i = 0; i < elementsXInfo.length; i++) {
@@ -144,34 +141,34 @@ const getSpace = (
         width: elementsWidths[i],
         top:
           elementsTop -
-          (drag_type === Config.furnishing.type.shelf
+          (drag_type === shelf
             ? Config.furnishing.shelf.interval
-            : drag_type === Config.furnishing.type.drawer ||
-              drag_type === Config.furnishing.type.divider ||
-              drag_type === Config.furnishing.type.door
+            : drag_type === drawer ||
+              drag_type === divider ||
+              drag_type === door
               ? drag_thickness
-              : drag_type === Config.furnishing.type.clothesRail
+              : drag_type === clothesRail
                 ? Config.furnishing.clothesRail.topSpace + 2 * drag_thickness
-                : drag_type === Config.furnishing.type.clothesLift
+                : drag_type === clothesLift
                   ? Config.furnishing.clothesLift.topSpace + 2 * drag_thickness
                   : Config.furnishing.default.interval + drag_thickness) - 0,
         bottom: 
           elementsBottom +
-          (drag_type === Config.furnishing.type.shelf
+          (drag_type === shelf
             ? Config.furnishing.shelf.interval - drag_thickness
-            : drag_type === Config.furnishing.type.drawer ||
-              drag_type === Config.furnishing.type.divider ||
-              drag_type === Config.furnishing.type.door
+            : drag_type === drawer ||
+              drag_type === divider ||
+              drag_type === door
               ? 0
-              : drag_type === Config.furnishing.type.clothesRail
+              : drag_type === clothesRail
                 ? Config.furnishing.clothesRail.availableSpace -
                 drag_thickness -
                 Config.furnishing.clothesRail.topSpace
-                : drag_type === Config.furnishing.type.clothesLift
+                : drag_type === clothesLift
                   ? Config.furnishing.clothesLift.availableSpace -
                   drag_thickness -
                   Config.furnishing.clothesLift.topSpace
-                  : drag_type === Config.furnishing.type.pantsPullout
+                  : drag_type === pantsPullout
                     ? Config.furnishing.pantsPullout.availableSpace
                     : Config.furnishing.default.interval) + 0,
         posX: elementsXInfo[i],
@@ -189,14 +186,12 @@ const getSpace = (
       tempSpace.height = tempSpace.top + drag_thickness - tempSpace.bottom
       tempSpace.posY = (tempSpace.top + drag_thickness + tempSpace.bottom) / 2
       if (tempSpace.top > tempSpace.bottom) {
-        if (doorCategory !== Config.furnishing.type.flap) {
-          if ((type === Config.furnishing.type.drawer || 
-            type === Config.furnishing.type.shelf ||
-            type === Config.furnishing.type.glassBottom ||
-            type === Config.furnishing.type.foldBottom
+        if (doorCategory !== flap) {
+          if ((type === drawer || 
+            type === shelf ||
+            type === glassBottom ||
+            type === foldBottom
           ) && (hanging || withFeet)) {
-            tempSpace.availableTop = tempSpace.availableTop
-            tempSpace.availableBottom = tempSpace.availableBottom
             tempSpace.bottom = tempSpace.bottom + 25
             tempSpace.top = tempSpace.top + 25
             result.push(tempSpace)
@@ -216,36 +211,36 @@ const getSpace = (
         )
         availableTop = top
         if (
-          assets[i][j].type === Config.furnishing.type.clothesRail ||
-          assets[i][j].type === Config.furnishing.type.clothesLift ||
-          assets[i][j].type === Config.furnishing.type.pantsPullout
+          assets[i][j].type === clothesRail ||
+          assets[i][j].type === clothesLift ||
+          assets[i][j].type === pantsPullout
         ) {
-          if (drag_type === Config.furnishing.type.clothesRail)
+          if (drag_type === clothesRail)
             top =
               top - Config.furnishing.clothesRail.topSpace - 2 * drag_thickness
-          else if (drag_type === Config.furnishing.type.clothesLift)
+          else if (drag_type === clothesLift)
             top =
               top - Config.furnishing.clothesLift.topSpace - 2 * drag_thickness
           else top = top - drag_thickness
         } else {
           switch (drag_type) {
-            case Config.furnishing.type.shelf:
+            case shelf:
               top -= Config.furnishing.shelf.interval
               break
-            case Config.furnishing.type.drawer:
-              if (assets[i][j].type === Config.furnishing.type.shelf)
+            case drawer:
+              if (assets[i][j].type === shelf)
                 top =
                   top -
                   Config.furnishing.shelf.interval +
                   Config.furnishing.shelf.thickness1 -
                   drag_thickness
               else if (
-                assets[i][j].type === Config.furnishing.type.drawer ||
-                assets[i][j].type === Config.furnishing.type.internalDrawer
+                assets[i][j].type === drawer ||
+                assets[i][j].type === internalDrawer
               ) {
                 if (
-                  type === Config.furnishing.type.internalDrawer &&
-                  assets[i][j].type === Config.furnishing.type.internalDrawer
+                  type === internalDrawer &&
+                  assets[i][j].type === internalDrawer
                 ) {
                   top =
                     top -
@@ -253,44 +248,43 @@ const getSpace = (
                     Config.furnishing.shelf.thickness1 +
                     Config.furnishing.internalDrawer.topShelfDistance
                 } else if (
-                  type === Config.furnishing.type.drawer &&
-                  assets[i][j].type === Config.furnishing.type.drawer
+                  type === drawer &&
+                  assets[i][j].type === drawer
                 ) {
                   top =
                     top -
                     drag_thickness +
                     Config.furnishing.shelf.thickness1
                 } else {
-                  top =
-                    top - Config.furnishing.default.interval - drag_thickness
+                  top = top - Config.furnishing.default.interval - drag_thickness
                 }
               } else
                 top = top - Config.furnishing.default.interval - drag_thickness
               break
-            case Config.furnishing.type.clothesRail:
+            case clothesRail:
               top =
                 top -
                 Config.furnishing.clothesRail.topSpace -
                 2 * drag_thickness
               break
-            case Config.furnishing.type.clothesLift:
+            case clothesLift:
               top =
                 top -
                 Config.furnishing.clothesLift.topSpace -
                 2 * drag_thickness
               break
-            case Config.furnishing.type.divider:
+            case divider:
               top = top - drag_thickness
               break
-            case Config.furnishing.type.door:
+            case door:
               top = top - drag_thickness
               break
-            case Config.furnishing.type.flap:
+            case flap:
               top = top - Config.door.flap_height_range.min
               // top = top - drag_thickness
               break
             default:
-              if (assets[i][j].type === Config.furnishing.type.shelf)
+              if (assets[i][j].type === shelf)
                 top =
                   top -
                   Config.furnishing.shelf.interval +
@@ -306,23 +300,23 @@ const getSpace = (
         if (j == 0) {
           bottom =
             elementsBottom +
-            (drag_type === Config.furnishing.type.shelf
+            (drag_type === shelf
               ? Config.furnishing.shelf.interval - drag_thickness
-              : drag_type === Config.furnishing.type.drawer ||
-                drag_type === Config.furnishing.type.divider ||
-                drag_type === Config.furnishing.type.door
+              : drag_type === drawer ||
+                drag_type === divider ||
+                drag_type === door
                 ? 0
-                : drag_type === Config.furnishing.type.clothesRail
+                : drag_type === clothesRail
                   ? Config.furnishing.clothesRail.availableSpace -
                   Config.furnishing.clothesRail.topSpace -
                   drag_thickness
-                  : drag_type === Config.furnishing.type.clothesLift
+                  : drag_type === clothesLift
                     ? Config.furnishing.clothesLift.availableSpace -
                     Config.furnishing.clothesLift.topSpace -
                     drag_thickness
-                    : drag_type === Config.furnishing.type.pantsPullout
+                    : drag_type === pantsPullout
                       ? Config.furnishing.pantsPullout.availableSpace
-                      : Config.furnishing.type.flap
+                      : flap
                         ? 0 : Config.furnishing.default.interval)
 
           availableBottom = elementsBottom
@@ -337,25 +331,25 @@ const getSpace = (
           availableBottom = bottom
 
           if (
-            assets[i][j - 1].type === Config.furnishing.type.clothesRail ||
-            assets[i][j - 1].type === Config.furnishing.type.clothesLift
+            assets[i][j - 1].type === clothesRail ||
+            assets[i][j - 1].type === clothesLift
           ) {
             switch (drag_type) {
-              case Config.furnishing.type.clothesRail:
+              case clothesRail:
                 bottom =
                   bottom +
                   Config.furnishing.clothesRail.availableSpace -
                   Config.furnishing.clothesRail.topSpace -
                   drag_thickness
                 break
-              case Config.furnishing.type.clothesLift:
+              case clothesLift:
                 bottom =
                   bottom +
                   Config.furnishing.clothesLift.availableSpace -
                   Config.furnishing.clothesLift.topSpace -
                   drag_thickness
                 break
-              case Config.furnishing.type.pantsPullout:
+              case pantsPullout:
                 bottom += Config.furnishing.pantsPullout.availableSpace
                 break
               default:
@@ -363,67 +357,67 @@ const getSpace = (
             }
           } else {
             switch (drag_type) {
-              case Config.furnishing.type.shelf:
+              case shelf:
                 bottom +=
                   Config.furnishing.shelf.interval -
                   Config.furnishing.shelf.thickness1
                 break
-              case Config.furnishing.type.drawer:
+              case drawer:
                 if (
-                  assets[i][j - 1].type === Config.furnishing.type.drawer ||
+                  assets[i][j - 1].type === drawer ||
                   assets[i][j - 1].type ===
-                  Config.furnishing.type.internalDrawer
+                  internalDrawer
                 ) {
                   if (
-                    type === Config.furnishing.type.internalDrawer &&
+                    type === internalDrawer &&
                     assets[i][j - 1].type ===
-                    Config.furnishing.type.internalDrawer
+                    internalDrawer
                   ) {
                     bottom =
                       bottom -
                       Config.furnishing.shelf.thickness1 -
                       Config.furnishing.internalDrawer.topShelfDistance
                   } else if (
-                    type === Config.furnishing.type.drawer &&
-                    assets[i][j - 1].type === Config.furnishing.type.drawer
+                    type === drawer &&
+                    assets[i][j - 1].type === drawer
                   ) {
                     bottom = bottom - Config.furnishing.shelf.thickness1
                   } else {
                     bottom += Config.furnishing.default.interval
                   }
                 } else if (
-                  assets[i][j - 1].type === Config.furnishing.type.shelf
+                  assets[i][j - 1].type === shelf
                 )
                   bottom +=
                     Config.furnishing.shelf.interval -
                     Config.furnishing.shelf.thickness1
                 else bottom += Config.furnishing.default.interval
                 break
-              case Config.furnishing.type.clothesRail:
+              case clothesRail:
                 bottom =
                   bottom +
                   Config.furnishing.clothesRail.availableSpace -
                   Config.furnishing.clothesRail.topSpace -
                   drag_thickness
                 break
-              case Config.furnishing.type.clothesLift:
+              case clothesLift:
                 bottom =
                   bottom +
                   Config.furnishing.clothesLift.availableSpace -
                   Config.furnishing.clothesLift.topSpace -
                   drag_thickness
                 break
-              case Config.furnishing.type.pantsPullout:
+              case pantsPullout:
                 bottom += Config.furnishing.pantsPullout.availableSpace
                 break
-              case Config.furnishing.type.divider:
+              case divider:
                 break
-              case Config.furnishing.type.door:
+              case door:
                 break
-              case Config.furnishing.type.flap:
+              case flap:
                 break
               default:
-                if (assets[i][j - 1].type === Config.furnishing.type.shelf)
+                if (assets[i][j - 1].type === shelf)
                   bottom +=
                     Config.furnishing.shelf.interval - assets[i][j - 1].scale[1]
                 else bottom = bottom + Config.furnishing.default.interval
@@ -454,7 +448,7 @@ const getSpace = (
         // console.log(top, bottom) consider drawer top, bottom shelf thickness on topasset, bottomasset is none
 
         if (top > bottom) {
-          if ( doorCategory === Config.furnishing.type.flap){
+          if ( doorCategory === flap){
             if (((tempSpace.availableTop - tempSpace.availableBottom) <= Config.door.flap_height_range.max && 
               (tempSpace.availableTop - tempSpace.availableBottom) >= Config.door.flap_height_range.min) &&
               tempSpace.width <= Config.door.flap_width_range.max && tempSpace.width >= Config.door.flap_width_range.min)
@@ -462,11 +456,9 @@ const getSpace = (
               result.push(tempSpace)
             }
           } else {
-            if ((type === Config.furnishing.type.drawer || 
-              type === Config.furnishing.type.shelf
+            if ((type === drawer || 
+              type === shelf
             ) && (hanging || withFeet)) {
-              tempSpace.availableTop = tempSpace.availableTop
-              tempSpace.availableBottom = tempSpace.availableBottom
               tempSpace.bottom = tempSpace.bottom + 25
               tempSpace.top = tempSpace.top + 25
               result.push(tempSpace)
@@ -481,17 +473,17 @@ const getSpace = (
       // console.log(drag_thickness)
       top =
         elementsTop -
-        (drag_type === Config.furnishing.type.shelf
+        (drag_type === shelf
           ? Config.furnishing.shelf.interval
-          : drag_type === Config.furnishing.type.drawer ||
-            drag_type === Config.furnishing.type.divider ||
-            drag_type === Config.furnishing.type.door
+          : drag_type === drawer ||
+            drag_type === divider ||
+            drag_type === door
             ? drag_thickness
-            : drag_type === Config.furnishing.type.clothesRail
+            : drag_type === clothesRail
               ? Config.furnishing.clothesRail.topSpace + 2 * drag_thickness
-              : drag_type === Config.furnishing.type.clothesLift
+              : drag_type === clothesLift
                 ? Config.furnishing.clothesLift.topSpace + 2 * drag_thickness
-                : Config.furnishing.type.flap
+                : flap
                   ? drag_thickness 
                     : Config.furnishing.default.interval + drag_thickness)
 
@@ -505,27 +497,25 @@ const getSpace = (
       availableBottom = bottom
 
       if (
-        assets[i][assets[i].length - 1].type ===
-        Config.furnishing.type.clothesRail ||
-        assets[i][assets[i].length - 1].type ===
-        Config.furnishing.type.clothesLift
+        assets[i][assets[i].length - 1].type === clothesRail ||
+        assets[i][assets[i].length - 1].type === clothesLift
       ) {
         switch (drag_type) {
-          case Config.furnishing.type.clothesRail:
+          case clothesRail:
             bottom =
               bottom +
               Config.furnishing.clothesRail.availableSpace -
               Config.furnishing.clothesRail.topSpace -
               drag_thickness
             break
-          case Config.furnishing.type.clothesLift:
+          case clothesLift:
             bottom =
               bottom +
               Config.furnishing.clothesLift.availableSpace -
               Config.furnishing.clothesLift.topSpace -
               drag_thickness
             break
-          case Config.furnishing.type.pantsPullout:
+          case pantsPullout:
             bottom += Config.furnishing.pantsPullout.availableSpace
             break
           default:
@@ -533,67 +523,62 @@ const getSpace = (
         }
       } else {
         switch (drag_type) {
-          case Config.furnishing.type.shelf:
+          case shelf:
             bottom +=
               Config.furnishing.shelf.interval -
               Config.furnishing.shelf.thickness1
             break
-          case Config.furnishing.type.drawer:
+          case drawer:
             if (
-              assets[i][assets[i].length - 1].type ===
-              Config.furnishing.type.drawer ||
-              assets[i][assets[i].length - 1].type ===
-              Config.furnishing.type.internalDrawer
+              assets[i][assets[i].length - 1].type === drawer ||
+              assets[i][assets[i].length - 1].type === internalDrawer
             ) {
               if (
-                type === Config.furnishing.type.internalDrawer &&
-                assets[i][assets[i].length - 1].type ===
-                Config.furnishing.type.internalDrawer
+                type === internalDrawer &&
+                assets[i][assets[i].length - 1].type === internalDrawer
               ) {
                 bottom =
                   bottom -
                   Config.furnishing.shelf.thickness1 -
                   Config.furnishing.internalDrawer.topShelfDistance
               } else if (
-                type === Config.furnishing.type.drawer &&
-                assets[i][assets[i].length - 1].type ===
-                Config.furnishing.type.drawer
+                type === drawer &&
+                assets[i][assets[i].length - 1].type === drawer
               ) {
                 bottom = bottom - Config.furnishing.shelf.thickness1
               } else {
                 bottom += Config.furnishing.default.interval
               }
             } else if (
-              assets[i][assets[i].length - 1].type ===
-              Config.furnishing.type.shelf
+              assets[i][assets[i].length - 1].type === shelf
             )
               bottom +=
                 Config.furnishing.shelf.interval -
                 Config.furnishing.shelf.thickness1
             else bottom += Config.furnishing.default.interval
             break
-          case Config.furnishing.type.clothesRail:
+          case clothesRail:
             bottom =
               bottom +
               Config.furnishing.clothesRail.availableSpace -
               Config.furnishing.clothesRail.topSpace -
               drag_thickness
             break
-          case Config.furnishing.type.clothesLift:
+          case clothesLift:
             bottom =
               bottom +
               Config.furnishing.clothesLift.availableSpace -
               Config.furnishing.clothesLift.topSpace -
               drag_thickness
             break
-          case Config.furnishing.type.pantsPullout:
+          case pantsPullout:
             bottom += Config.furnishing.pantsPullout.availableSpace
             break
-          case Config.furnishing.type.divider:
+          case divider:
             break
-          case Config.furnishing.type.door:
+          case door:
             break
-          case Config.furnishing.type.flap:
+          case flap:
             console.log(top, bottom, top-bottom)
             // if ( ((top-bottom) > Config.door.flap_height_range.max) &&
             //   ((top-bottom) < Config.door.flap_height_range.min)) {
@@ -601,10 +586,7 @@ const getSpace = (
             // }
             break
           default:
-            if (
-              assets[i][assets[i].length - 1].type ===
-              Config.furnishing.type.shelf
-            )
+            if (assets[i][assets[i].length - 1].type === shelf)
               bottom +=
                 Config.furnishing.shelf.interval -
                 assets[i][assets[i].length - 1].scale[1]
@@ -631,7 +613,7 @@ const getSpace = (
       }
 
       if (top > bottom) {
-        if (doorCategory === Config.furnishing.type.flap) {
+        if (doorCategory === flap) {
 
           if ((tempSpace.availableTop - tempSpace.availableBottom) <= Config.door.flap_height_range.max 
             && (tempSpace.availableTop - tempSpace.availableBottom) >= Config.door.flap_height_range.min &&
@@ -640,23 +622,482 @@ const getSpace = (
           }
             
         } else {
-          if ((type === Config.furnishing.type.drawer || 
-            type === Config.furnishing.type.shelf
-          ) && (hanging || withFeet)) {
-            tempSpace.availableTop = tempSpace.availableTop
-            tempSpace.availableBottom = tempSpace.availableBottom
+          if ((type === drawer || type === shelf) && (hanging || withFeet)) {
             tempSpace.bottom = tempSpace.bottom + 25
             tempSpace.top = tempSpace.top + 25
-            result.push(tempSpace)
-          } else {
-            result.push(tempSpace)
           }
+          result.push(tempSpace)
         }
       }
     }
   }
 
   return result
+}
+
+
+const getUnavailableSpace = ({
+  result,
+  elementsXInfo,
+  elementsWidths,
+  elementsTop,
+  elementsBottom,
+  type,
+  drag_thickness,
+  original_assets,
+  depth,
+  inDivider,
+  d_xIndex,
+  d_yPos,
+  korpusMaterial,
+  doorCategory,
+  hanging,
+  withFeet,
+  withOutFeet,
+  furnishingAssets
+}) => {
+  getSpace({
+    result, // This gets filled by getSpace
+    elementsXInfo,
+    elementsWidths,
+    elementsTop,
+    elementsBottom,
+    type, 
+    drag_thickness,
+    original_assets,
+    depth,
+    inDivider,
+    d_xIndex, // Not used for unavailable space calculation
+    d_yPos,
+    korpusMaterial,
+    undefined,
+    hanging,
+    withFeet,
+    withOutFeet
+  });
+
+  const { shelf, glassBottom, drawer, internalDrawer, clothesRail, clothesLift, pantsPullout, door, flap, divider, foldBottom } = Config.furnishing.type;
+  const shelfTypes = [shelf, foldBottom, glassBottom];
+  const drawerTypes = [drawer, internalDrawer];
+  const unavailableSpaces = [];
+  const sections = {};
+
+  const info = (type) => {
+    const match = Object.keys(Config.furnishing.type).find(key => Config.furnishing.type[key] === type);
+    return Config.furnishing[match];
+  };
+
+  result.forEach((item, i) => {
+    const sectionIndex = item.xIndex;
+    if (!sections[sectionIndex]) sections[sectionIndex] = [];
+    item.spaceType = 'available';
+    item.id = `${item.xIndex}available${i}`;
+    sections[sectionIndex].push(item);
+  });
+
+  Object.keys(sections).forEach(sectionKey => {
+    const section = sections[sectionKey];
+
+    if (shelfTypes.includes(type)) {
+      unavailableSpaces.push({ // top
+        top: elementsTop,
+        bottom: elementsTop - 14,
+        width: section[section.length - 1].width,
+        height: 14,
+        posX: section[section.length - 1].posX,
+        posY: elementsTop - (14 / 2),
+        posZ: depth + 0.5,
+        inDivider: false,
+        xIndex: parseInt(sectionKey),
+        type: 'top',
+        id: `top${sectionKey}`,
+        spaceType: 'unavailable',
+      })
+      unavailableSpaces.push({ // bottom
+        top: elementsBottom + 14,
+        bottom: elementsBottom,
+        width: section[0].width,
+        height: 14,
+        posX: section[0].posX,
+        posY: elementsBottom + (14 / 2),
+        posZ: depth + 0.5,
+        inDivider: false,
+        xIndex: sectionKey,
+        type: 'bottom',
+        id: `bottom${sectionKey}`,
+        spaceType: 'unavailable',
+      })
+    }
+  })
+
+  original_assets.forEach((asset, i) => {
+    const {xIndex, position, scale} = asset;
+    const assetInfo = info(asset.type);
+
+    const top = position[1] + (scale[1]) + assetInfo.minDistance;
+    const bottom = position[1] - (scale[1]) - assetInfo.minDistance;
+
+    // now if we got a drawer, and we are dragging a shelf, the drawer should have unavailable space minDistance as per shelf
+
+    const obj = { // furniture items
+      top,
+      bottom,
+      width: sections[xIndex][0].width,
+      height: top - bottom,
+      posX: position[0],
+      posY: position[1],
+      posZ: depth + 0.5,
+      inDivider: false,
+      xIndex: xIndex,
+      type: asset.type,
+      id: `${asset.type}${i}`,
+      spaceType: 'unavailable',
+    }
+
+    unavailableSpaces.push(obj)
+  })
+
+  // unavailableSpaces.forEach(unavailable => {
+  //   const xIndex = unavailable.xIndex;
+  //   sections[xIndex].push(unavailable);
+  // });
+
+  // Object.keys(sections).forEach(key => sections[key].sort((a, b) => a.bottom - b.bottom));
+
+  // Object.keys(sections).forEach(key => {
+  //   const section = sections[key];
+
+  //   if (key !== '0') return;
+
+  //   section.forEach((space, i) => {
+  //     const { id, spaceType, top, bottom } = space; // id is unique (to find unavailableSpaces) space type = available || unavailable
+
+  //     if (spaceType === 'unavailable') {
+
+  //       if (i !== section.length - 1) { // check above
+  //         const nextSpace = section[i + 1];
+  //         const nextBottom = nextSpace.bottom;
+  //         const gapAbove = nextBottom - top;
+  //         if (gapAbove > 0) console.log(`${id} Above: ${gapAbove}`);
+  //       }
+
+  //       if (i !== 0) { // check below
+  //         const previousSpace = section[i - 1];
+  //         const previousTop = previousSpace.top;
+  //         const gapBelow = bottom - previousTop;
+  //         if (gapBelow > 0) console.log(`${id} Below: ${gapBelow}`);
+  //       }
+  //     }
+
+  //   });
+  // });
+
+  // console.log('---------------------------')
+
+  return unavailableSpaces;
+};
+
+
+export const unavailableSpace = ({
+  elementsWidths,
+  baseType,
+  height,
+  depth,
+  type,
+  drawerHeight,
+  drawerTopDistance,
+  furnishingAssets,
+  doorAssets,
+  assetDragging,
+  selectionInfo,
+  korpusMaterial,
+  hanging,
+  withFeet,
+  withOutFeet,
+  currentIndex
+}) => {
+
+  const {shelf, foldBottom, glassBottom} = Config.furnishing.type;
+  const shelfTypes = [shelf, foldBottom, glassBottom];
+  const drag_thickness = getThickness(type, drawerHeight, drawerTopDistance, depth);
+  let elementsXInfo = [];
+
+  for (let index = 0; index < elementsWidths.length; index++) {
+    if (index === 0) {
+      elementsXInfo.push(Config.plate.thickness + elementsWidths[index] / 2)
+    } else {
+      elementsXInfo.push(
+        elementsXInfo[index - 1] +
+        elementsWidths[index - 1] / 2 +
+        Config.plate.thickness +
+        elementsWidths[index] / 2
+      )
+    }
+  }
+
+  let elementsTop = height - Config.plate.thickness;
+  let elementsBottom =
+    (baseType == Config.baseType.panel && !hanging && !withFeet && !withOutFeet
+      ? Config.plate.plinthHeight
+      : Config.glider.height) + Config.plate.thickness;
+
+  const dividerArrays = {};
+  let updatedAssets = [...furnishingAssets];
+
+  // if (currentIndex) updatedAssets.splice(currentIndex, 1);
+
+  if ((shelfTypes.includes(type)) && assetDragging) {
+    updatedAssets = furnishingAssets.filter(asset => !shelfTypes.includes(asset.type))
+  }
+
+  updatedAssets.forEach((item) => {
+    let selected = false
+
+    if (
+      item.xIndex === selectionInfo.xIndex &&
+      item.position[1] === selectionInfo.yPos &&
+      item.d_xIndex === selectionInfo.d_xIndex &&
+      item.d_yPos === selectionInfo.d_yPos
+    )
+      selected = true
+
+    if (item.inDivider && !selected) {
+      const key = `${item.d_xIndex}_${item.d_yPos}`;
+      if (!dividerArrays[key]) {
+        dividerArrays[key] = []
+      }
+      dividerArrays[key].push(item)
+    }
+  })
+
+  Object.values(dividerArrays).forEach((sublist) => {
+    sublist.sort((a, b) => {
+      if (a.xIndex !== b.xIndex) {
+        return a.xIndex - b.xIndex
+      }
+      return a.position[1] - b.position[1]
+    })
+  })
+
+  const f_assets = updatedAssets
+    .filter((asset) => {
+      let selected = asset.xIndex === selectionInfo.xIndex && asset.position[1] === selectionInfo.yPos;
+      return !asset.inDivider && !selected
+    })
+    .sort((a, b) => {
+      if (a.xIndex !== b.xIndex) return a.xIndex - b.xIndex;
+      return a.position[1] - b.position[1];
+    })
+
+  const result = [];
+
+  const unavailableSpaces = getUnavailableSpace({
+    result,
+    elementsXInfo,
+    elementsWidths,
+    elementsTop,
+    elementsBottom,
+    type,
+    drag_thickness,
+    original_assets: f_assets,
+    depth,
+    inDivider: false,
+    d_xIndex: 0,
+    d_yPos: 0,
+    korpusMaterial,
+    doorCategory: '',
+    hanging,
+    withFeet,
+    withOutFeet,
+    furnishingAssets
+  })
+
+  return unavailableSpaces;
+}
+
+export const getAvailableSpace = ({
+  elementsWidths,
+  baseType,
+  height,
+  depth,
+  type,
+  drawerHeight,
+  drawerTopDistance,
+  furnishingAssets,
+  doorAssets,
+  assetDragging,
+  selectionInfo,
+  korpusMaterial,
+  hanging,
+  withFeet,
+  withOutFeet,
+  currentIndex,
+  isPlus
+}) => {
+  const {shelf, foldBottom, glassBottom} = Config.furnishing.type;
+  const shelfTypes = [shelf, foldBottom, glassBottom];
+  const drag_thickness = getThickness(type, drawerHeight, drawerTopDistance, depth);
+  let elementsXInfo = [];
+
+  for (let index = 0; index < elementsWidths.length; index++) {
+    if (index === 0) {
+      elementsXInfo.push(Config.plate.thickness + elementsWidths[index] / 2)
+    } else {
+      elementsXInfo.push(
+        elementsXInfo[index - 1] +
+        elementsWidths[index - 1] / 2 +
+        Config.plate.thickness +
+        elementsWidths[index] / 2
+      )
+    }
+  }
+
+  let elementsTop = height - Config.plate.thickness;
+  let elementsBottom =
+    (baseType == Config.baseType.panel && !hanging && !withFeet && !withOutFeet
+      ? Config.plate.plinthHeight
+      : Config.glider.height) + Config.plate.thickness;
+
+  const dividerArrays = {};
+  let updatedAssets = [...furnishingAssets];
+
+  // if (currentIndex) updatedAssets.splice(currentIndex, 1);
+
+  if ((shelfTypes.includes(type)) && assetDragging) {
+    updatedAssets = furnishingAssets.filter(asset => !shelfTypes.includes(asset.type))
+  }
+
+  updatedAssets.forEach((item) => {
+    let selected = false
+
+    if (
+      item.xIndex === selectionInfo.xIndex &&
+      item.position[1] === selectionInfo.yPos &&
+      item.d_xIndex === selectionInfo.d_xIndex &&
+      item.d_yPos === selectionInfo.d_yPos
+    )
+      selected = true
+
+    if (item.inDivider && !selected) {
+      const key = `${item.d_xIndex}_${item.d_yPos}`;
+      if (!dividerArrays[key]) {
+        dividerArrays[key] = []
+      }
+      dividerArrays[key].push(item)
+    }
+  })
+
+  Object.values(dividerArrays).forEach((sublist) => {
+    sublist.sort((a, b) => {
+      if (a.xIndex !== b.xIndex) {
+        return a.xIndex - b.xIndex
+      }
+      return a.position[1] - b.position[1]
+    })
+  })
+
+  const f_assets = updatedAssets
+    .filter((asset) => {
+      let selected = asset.xIndex === selectionInfo.xIndex && asset.position[1] === selectionInfo.yPos;
+      return !asset.inDivider && !selected
+    })
+    .sort((a, b) => {
+      if (a.xIndex !== b.xIndex) return a.xIndex - b.xIndex;
+      return a.position[1] - b.position[1];
+    })
+
+  const result = [];
+  
+  getSpace({
+    result,
+    elementsXInfo,
+    elementsWidths,
+    elementsTop,
+    elementsBottom,
+    type,
+    drag_thickness,
+    original_assets: f_assets,
+    depth,
+    inDivider: undefined,
+    d_xIndex: 0,
+    d_yPos: 0,
+    korpusMaterial,
+    undefined,
+    hanging,
+    withFeet,
+    withOutFeet
+  })
+
+  if (type !== Config.furnishing.type.divider) {
+    f_assets
+      .filter((asset) => asset.type === Config.furnishing.type.divider)
+      .forEach((divider_asset) => {
+        const d_assets =
+          dividerArrays[divider_asset.xIndex + "_" + divider_asset.position[1]]
+
+        const e_widths = [
+          divider_asset.dividerLeftWidth,
+          divider_asset.scale[0] -
+          divider_asset.dividerLeftWidth -
+          Config.furnishing.divider.thickness,
+        ]
+
+        elementsXInfo = [
+          divider_asset.position[0] -
+          divider_asset.scale[0] / 2 +
+          e_widths[0] / 2,
+          divider_asset.position[0] +
+          divider_asset.scale[0] / 2 -
+          e_widths[1] / 2,
+        ]
+
+        elementsBottom = divider_asset.position[1] - divider_asset.scale[1] / 2
+        elementsTop =
+          divider_asset.position[1] +
+          divider_asset.scale[1] / 2 -
+          (divider_asset.topShelfVisible
+            ? Config.furnishing.divider.thickness
+            : 0)
+
+        getSpace(
+          result,
+          elementsXInfo,
+          e_widths,
+          elementsTop,
+          elementsBottom,
+          type,
+          drag_thickness,
+          d_assets,
+          depth,
+          true,
+          divider_asset.xIndex,
+          divider_asset.position[1],
+          korpusMaterial
+        )
+      })
+  }
+
+  if (type === Config.furnishing.type.drawer) {
+    return result.filter(space => {
+      const filteredAssets = doorAssets.filter(door => door.xIndex === space.xIndex);
+
+      for (let i = 0; i < filteredAssets.length; i++) {
+        if (
+          space.availableTop <
+          filteredAssets[i].position[1] +
+          filteredAssets[i].scale[1] * 0.5 +
+          0.1 &&
+          space.availableBottom >
+          filteredAssets[i].position[1] -
+          filteredAssets[i].scale[1] * 0.5 -
+          0.1
+        ) return false;
+      }
+      return true;
+    })
+  }
+
+  return result;
 }
 
 export const getDimensions = (
@@ -747,7 +1188,7 @@ export const getDimensions = (
   return temp
 }
 
-export const getDoorSpace = (
+export const getDoorSpace = ({
   elementsWidths,
   baseType,
   height,
@@ -760,7 +1201,7 @@ export const getDoorSpace = (
   korpusType,
   type,
   withFeetFlag
-) => {
+}) => {
   // x position for elements
   let elementsXInfo = []
   for (let index = 0; index < elementsWidths.length; index++) {
@@ -804,225 +1245,23 @@ export const getDoorSpace = (
   })
 
   const result = []
-  getSpace(
+  getSpace({
     result,
     elementsXInfo,
     elementsWidths,
     elementsTop,
     elementsBottom,
-    Config.furnishing.type.door,
-    Config.door.min_height,
-    assets,
+    type: Config.furnishing.type.door,
+    drag_thickness: Config.door.min_height,
+    original_assets: assets,
     depth,
-    false,
-    0,
-    0,
+    inDivider: false,
+    d_xIndex: 0,
+    d_yPos: 0,
     korpusMaterial,
-    type,
-  )
-
-  return result
-}
-
-export const getAvailableSpace = (
-  elementsWidths,
-  baseType,
-  height,
-  depth,
-  type,
-  drawerHeight,
-  drawerTopDistance,
-  furnishingAssets,
-  doorAssets,
-  assetDragging,
-  selectionInfo,
-  korpusMaterial,
-  hanging,
-  withFeet,
-  withOutFeet
-) => {
-  // dragged asset thickness
-  const drag_thickness = getThickness(
-    type,
-    drawerHeight,
-    drawerTopDistance,
-    depth
-  )
-
-  // x position for elements
-  let elementsXInfo = []
-  for (let index = 0; index < elementsWidths.length; index++) {
-    if (index === 0) {
-      elementsXInfo.push(Config.plate.thickness + elementsWidths[index] / 2)
-    } else {
-      elementsXInfo.push(
-        elementsXInfo[index - 1] +
-        elementsWidths[index - 1] / 2 +
-        Config.plate.thickness +
-        elementsWidths[index] / 2
-      )
-    }
-  }
-
-  let elementsTop = height - Config.plate.thickness
-  let elementsBottom =
-    (baseType == Config.baseType.panel && !hanging && !withFeet && !withOutFeet
-      ? Config.plate.plinthHeight
-      : Config.glider.height) + Config.plate.thickness
-
-  const dividerArrays = {}
-
-  let updatedAssets
-
-  if ((type === Config.furnishing.type.shelf || type === Config.furnishing.type.foldBottom || type === Config.furnishing.type.glassBottom) && assetDragging) {
-    updatedAssets = furnishingAssets.filter(asset => asset.type !== type)
-  } else {
-    updatedAssets = [ ...furnishingAssets]
-  }
-
-  updatedAssets.forEach((item) => {
-    let selected = false
-
-    if (
-      // assetDragging &&
-      item.xIndex === selectionInfo.xIndex &&
-      item.position[1] === selectionInfo.yPos &&
-      item.d_xIndex === selectionInfo.d_xIndex &&
-      item.d_yPos === selectionInfo.d_yPos
-    )
-      selected = true
-
-    if (item.inDivider && !selected) {
-      const key = `${item.d_xIndex}_${item.d_yPos}`
-      if (!dividerArrays[key]) {
-        dividerArrays[key] = []
-      }
-      dividerArrays[key].push(item)
-    }
+    doorCategory: type,
   })
-
-  Object.values(dividerArrays).forEach((sublist) => {
-    sublist.sort((a, b) => {
-      if (a.xIndex !== b.xIndex) {
-        return a.xIndex - b.xIndex
-      }
-      return a.position[1] - b.position[1]
-    })
-  })
-
-  const f_assets = updatedAssets
-    .filter((asset) => {
-      let selected = false
-      if (
-        // assetDragging &&
-        asset.xIndex === selectionInfo.xIndex &&
-        asset.position[1] === selectionInfo.yPos
-      )
-        selected = true
-
-      return !asset.inDivider && !selected
-    })
-    .sort((a, b) => {
-      if (a.xIndex !== b.xIndex) {
-        return a.xIndex - b.xIndex
-      }
-      return a.position[1] - b.position[1]
-    })
-
-  const result = []
-  getSpace(
-    result,
-    elementsXInfo,
-    elementsWidths,
-    elementsTop,
-    elementsBottom,
-    type,
-    drag_thickness,
-    f_assets,
-    depth,
-    false,
-    0,
-    0,
-    korpusMaterial,
-    undefined,
-    hanging,
-    withFeet,
-    withOutFeet
-  )
-
-  if (type !== Config.furnishing.type.divider) {
-    f_assets
-      .filter((asset) => asset.type === Config.furnishing.type.divider)
-      .forEach((divider_asset) => {
-        const d_assets =
-          dividerArrays[divider_asset.xIndex + "_" + divider_asset.position[1]]
-
-        const e_widths = [
-          divider_asset.dividerLeftWidth,
-          divider_asset.scale[0] -
-          divider_asset.dividerLeftWidth -
-          Config.furnishing.divider.thickness,
-        ]
-
-        elementsXInfo = [
-          divider_asset.position[0] -
-          divider_asset.scale[0] / 2 +
-          e_widths[0] / 2,
-          divider_asset.position[0] +
-          divider_asset.scale[0] / 2 -
-          e_widths[1] / 2,
-        ]
-
-        elementsBottom = divider_asset.position[1] - divider_asset.scale[1] / 2
-        elementsTop =
-          divider_asset.position[1] +
-          divider_asset.scale[1] / 2 -
-          (divider_asset.topShelfVisible
-            ? Config.furnishing.divider.thickness
-            : 0)
-
-        getSpace(
-          result,
-          elementsXInfo,
-          e_widths,
-          elementsTop,
-          elementsBottom,
-          type,
-          drag_thickness,
-          d_assets,
-          depth,
-          true,
-          divider_asset.xIndex,
-          divider_asset.position[1],
-          korpusMaterial
-        )
-      })
-  }
-
-  if (type === Config.furnishing.type.drawer) {
-    return result.filter((space) => {
-      const filteredAssets = doorAssets.filter(
-        (door) => door.xIndex === space.xIndex
-      )
-      for (let i = 0; i < filteredAssets.length; i++) {
-        if (
-          space.availableTop <
-          filteredAssets[i].position[1] +
-          filteredAssets[i].scale[1] * 0.5 +
-          0.1 &&
-          space.availableBottom >
-          filteredAssets[i].position[1] -
-          filteredAssets[i].scale[1] * 0.5 -
-          0.1
-        )
-          return false
-      }
-
-      return true
-    })
-  }
-
-  return result
+  return result;
 }
 
 export const getLedSpace = (

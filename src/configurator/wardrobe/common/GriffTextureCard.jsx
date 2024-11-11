@@ -1,11 +1,7 @@
-// import { useCallback } from "react"
-// import Config from "../../config"
-
-// import InfoIcon from "../../../assets/icons/info_icon.svg"
-import { InfoIcon } from "@src/components/icons";
+import InfoIcon from "@src/assets/icons/info_icon.svg"
 
 export default function GriffTextureCard(props) {
-  const { imageUrl } = props; // type, texture_type
+  const { imageUrl, type, texture_type } = props
 
   return (
     <div className="relative">
@@ -13,7 +9,7 @@ export default function GriffTextureCard(props) {
         <img src={imageUrl} draggable={false} className="w-full " />
       </div>
       <div className="absolute right-0 top-0 cursor-target">
-        <InfoIcon />
+        <img src={InfoIcon} />
       </div>
     </div>
   )

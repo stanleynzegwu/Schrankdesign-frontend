@@ -1,31 +1,71 @@
 import { useCallback, useEffect, useState } from "react";
 import Config from "../../../config";
 import { formatNumber } from "../../utils/formatNumber";
-import CustomSlider1 from "../../common/customSlider1";
 import PlusIcon from "../../../../assets/icons/plus_icon.svg";
 import MinusIcon from "../../../../assets/icons/minus_icon.svg";
+import CustomSlider1 from "../../common/customSlider1";
 import useDimensionStore from "../../zustand/dimensionStore";
 import useFurnishingStore from "../../zustand/furnishingStore";
-// import toast from "react-hot-toast";
+
+import {
+  updateLedAssets,
+  updateDoorAssets,
+  updateFurnishing,
+  updateFurnishingBaseType,
+} from "../../utils/updateFurnishing";
 
 export default function WardrobeSize() {
-  const width = useDimensionStore.use.width();
-  const height = useDimensionStore.use.height();
-  const depth = useDimensionStore.use.depth();
-  const elementsCount = useDimensionStore.use.elementsCount();
-  const manual = useDimensionStore.use.manual();
-  const elementsWidths = useDimensionStore.use.elementsWidths();
-  const setWidth = useDimensionStore.use.setWidth();
-  const setHeight = useDimensionStore.use.setHeight();
-  const setDepth = useDimensionStore.use.setDepth();
-  const setElementsCount = useDimensionStore.use.setElementsCount();
-  const setElementsWidths = useDimensionStore.use.setElementsWidths();
-  const eWidthsFixed = useDimensionStore.use.eWidthsFixed();
+  const {
+    width,
+    height,
+    depth,
+    elementsCount,
+    manual,
+    elementsWidths,
+    setWidth,
+    setHeight,
+    setDepth,
+    setElementsCount,
+    setElementsWidths,
+    eWidthsFixed,
+    minLength,
+    baseType,
+  } = useDimensionStore((state) => ({
+    width: state.width,
+    height: state.height,
+    depth: state.depth,
+    elementsCount: state.elementsCount,
+    manual: state.manual,
+    elementsWidths: state.elementsWidths,
+    setWidth: state.setWidth,
+    setHeight: state.setHeight,
+    setDepth: state.setDepth,
+    setElementsCount: state.setElementsCount,
+    setElementsWidths: state.setElementsWidths,
+    eWidthsFixed: state.eWidthsFixed,
+    minLength: state.minLength,
+    baseType: state.baseType,
+  }));
 
-  const minLength = useDimensionStore.use.minLength();
-  // const minHeight = useDimensionStore.use.minHeight();
-
-
+  const {
+    ledAssets,
+    doorAssets,
+    setLedAssets,
+    setDoorAssets,
+    furnishingAssets,
+    originalBaseType,
+    setOriginalBaseType,
+    setFurnishingAssets,
+  } = useFurnishingStore((state) => ({
+    ledAssets: state.ledAssets,
+    doorAssets: state.doorAssets,
+    setLedAssets: state.setLedAssets,
+    setDoorAssets: state.setDoorAssets,
+    furnishingAssets: state.furnishingAssets,
+    originalBaseType: state.originalBaseType,
+    setOriginalBaseType: state.setOriginalBaseType,
+    setFurnishingAssets: state.setFurnishingAssets,
+  }));
 
   // use temp variables for just showing on UI
   const [tempWidth, setTempWidth] = useState(width.toFixed(0));
@@ -41,19 +81,17 @@ export default function WardrobeSize() {
   }, [width]);
 
   useEffect(() => {
-    // console.log("herererer", maxHeight)
+    // ! set max height
   }, [maxHeight]);
 
   const handleWidth = useCallback(
     (w) => {
       if (w === width) return;
       if (!manual) {
-        // standard
         let numberofElement = Math.floor(
-          (w - Config.plate.thickness) /
-            (Config.plate.maxDoorLength + Config.plate.thickness)
+          (w - Config.plate.thickness) / (Config.plate.maxDoorLength + Config.plate.thickness)
         );
-        // in the case of exactly different
+
         if (
           w !=
           numberofElement * Config.plate.maxDoorLength +
@@ -65,10 +103,7 @@ export default function WardrobeSize() {
         const elements = [];
 
         let tempElementWidth = Number(
-          (
-            (w - Config.plate.thickness) / numberofElement -
-            Config.plate.thickness
-          ).toFixed(1)
+          ((w - Config.plate.thickness) / numberofElement - Config.plate.thickness).toFixed(1)
         );
 
         if (tempElementWidth < minLength) {
@@ -77,27 +112,21 @@ export default function WardrobeSize() {
           );
         }
 
-        if (w == 35) 
-          numberofElement = 1
+        if (w == 35) numberofElement = 1;
 
         for (let index = 0; index < numberofElement; index++) {
           elements.push(
             Number(
-              (
-                (w - Config.plate.thickness) / numberofElement -
-                Config.plate.thickness
-              ).toFixed(1)
+              ((w - Config.plate.thickness) / numberofElement - Config.plate.thickness).toFixed(1)
             )
           );
         }
 
         setElementsWidths(elements);
-
         setElementsCount(numberofElement);
-
         setWidth(w);
+        return;
       } else {
-        // manual case
         const widthRange = [
           {
             min: Config.plate.thickness,
@@ -110,18 +139,10 @@ export default function WardrobeSize() {
         for (let index = 0; index < elementsCount; index++) {
           if (eWidthsFixed[index]) {
             widthRange.push({
-              min:
-                widthRange[index].min +
-                elementsWidths[index] +
-                Config.plate.thickness,
-              max:
-                widthRange[index].max +
-                elementsWidths[index] +
-                Config.plate.thickness,
+              min: widthRange[index].min + elementsWidths[index] + Config.plate.thickness,
+              max: widthRange[index].max + elementsWidths[index] + Config.plate.thickness,
             });
-            fixedSum.push(
-              fixedSum[index] + elementsWidths[index] + Config.plate.thickness
-            );
+            fixedSum.push(fixedSum[index] + elementsWidths[index] + Config.plate.thickness);
             fixedCount.push(fixedCount[index] + 1);
           } else {
             widthRange.push({
@@ -131,9 +152,7 @@ export default function WardrobeSize() {
                 minLength +
                 Config.plate.thickness,
               max:
-                widthRange[index].max +
-                Config.plate.maxDoubleDoorLength +
-                Config.plate.thickness,
+                widthRange[index].max + Config.plate.maxDoubleDoorLength + Config.plate.thickness,
             });
             fixedSum.push(fixedSum[index]);
             fixedCount.push(fixedCount[index]);
@@ -161,18 +180,14 @@ export default function WardrobeSize() {
           let maxWidth = widthRange[elementsCount].max;
           while (w > maxWidth) {
             count++;
-            maxWidth =
-              maxWidth +
-              Config.plate.maxDoubleDoorLength +
-              Config.plate.thickness;
+            maxWidth = maxWidth + Config.plate.maxDoubleDoorLength + Config.plate.thickness;
           }
         }
 
         let expectedDistance = Number(
           (
             (w - fixedSum[count > elementsCount ? elementsCount : count]) /
-              (count -
-                fixedCount[count > elementsCount ? elementsCount : count]) -
+              (count - fixedCount[count > elementsCount ? elementsCount : count]) -
             Config.plate.thickness
           ).toFixed(1)
         );
@@ -185,7 +200,7 @@ export default function WardrobeSize() {
             elements.push(expectedDistance);
           }
         }
-
+        console.time("setElementsWidths");
         setElementsWidths(elements);
 
         setWidth(w);
@@ -193,6 +208,7 @@ export default function WardrobeSize() {
         if (count != elementsCount) {
           setElementsCount(count);
         }
+        console.timeEnd("handleWidth");
       }
     },
     [width, elementsCount, manual, elementsWidths]
@@ -229,21 +245,20 @@ export default function WardrobeSize() {
 
   const validateWidth = useCallback(
     (temp) => {
-      if (temp < Math.floor(minLength+ Config.plate.thickness*2)) {
+      if (temp < Math.floor(minLength + Config.plate.thickness * 2)) {
         alert("width should be greater than " + minLength.toString() + "cm.");
-        setTempWidth(Math.floor(minLength+ Config.plate.thickness*2).toString());
-        handleWidth(minLength + Config.plate.thickness*2);
+        setTempWidth(Math.floor(minLength + Config.plate.thickness * 2).toString());
+        handleWidth(minLength + Config.plate.thickness * 2);
+        return;
       } else if (temp > Config.plate.maxWidth) {
-        alert(
-          "width should be less than " +
-            Config.plate.maxWidth.toString() +
-            "cm."
-        );
+        alert("width should be less than " + Config.plate.maxWidth.toString() + "cm.");
         setTempWidth(Config.plate.maxWidth.toString());
         handleWidth(Config.plate.maxWidth);
+        return;
       } else {
         setTempWidth(temp.toFixed(0));
         handleWidth(temp);
+        return;
       }
     },
     [width]
@@ -263,19 +278,11 @@ export default function WardrobeSize() {
         );
         setTempHeight(height.toFixed(0));
       } else if (temp < Config.plate.minHeight) {
-        alert(
-          "Height should be greater than " +
-            Config.plate.minHeight.toString() +
-            "cm."
-        );
+        alert("Height should be greater than " + Config.plate.minHeight.toString() + "cm.");
         setTempHeight(Config.plate.minHeight.toString());
         setHeight(Config.plate.minHeight);
       } else if (temp > Config.plate.maxHeight) {
-        alert(
-          "Height should be less than " +
-            Config.plate.maxHeight.toString() +
-            "cm."
-        );
+        alert("Height should be less than " + Config.plate.maxHeight.toString() + "cm.");
         setTempHeight(Config.plate.maxHeight.toString());
         setHeight(Config.plate.maxHeight);
       } else {
@@ -300,19 +307,11 @@ export default function WardrobeSize() {
         );
         setTempDepth(depth.toFixed(0));
       } else if (temp < Config.plate.minDepth) {
-        alert(
-          "Depth should be greater than " +
-            Config.plate.minDepth.toString() +
-            "cm."
-        );
+        alert("Depth should be greater than " + Config.plate.minDepth.toString() + "cm.");
         setTempDepth(Config.plate.minDepth.toString());
         setDepth(Config.plate.minDepth);
       } else if (temp > Config.plate.maxDepth) {
-        alert(
-          "Depth should be less than " +
-            Config.plate.maxDepth.toString() +
-            "cm."
-        );
+        alert("Depth should be less than " + Config.plate.maxDepth.toString() + "cm.");
         setTempDepth(Config.plate.maxDepth.toString());
         setDepth(Config.plate.maxDepth);
       } else {
@@ -352,10 +351,10 @@ export default function WardrobeSize() {
         <CustomSlider1
           aria-label="width"
           value={Number(tempWidth)}
-          onChange={(e) =>{
-            validateWidth(formatNumber(e.target.value))
+          onChange={(e) => {
+            validateWidth(formatNumber(e.target.value));
           }}
-          min={Math.floor(minLength+ Config.plate.thickness*2)+1}
+          min={Math.floor(minLength + Config.plate.thickness * 2) + 1}
           max={Config.plate.maxWidth}
         />
         <button

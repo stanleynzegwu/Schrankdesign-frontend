@@ -9,6 +9,10 @@ const GriffComponent = React.memo(function GriffComponent({
   initialElementIndex,
   position,
 }) {
+  useEffect(() => {
+    // console.log(initialScale, "here")
+  }, []);
+  // console.log(initialScale, "here");
   return (
     <group position={position}>
       <Griff

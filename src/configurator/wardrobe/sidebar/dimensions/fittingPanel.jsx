@@ -5,8 +5,7 @@ import FittingAll from "../../../../assets/icons/fitting_all.svg"
 import FittingLeft from "../../../../assets/icons/fitting_left.svg"
 import FittingRight from "../../../../assets/icons/fitting_right.svg"
 import FittingTop from "../../../../assets/icons/fitting_top.svg"
-// import InfoIcon from "../../../../assets/icons/info_icon.svg"
-import { InfoIcon } from "@src/components/icons";
+import InfoIcon from "../../../../assets/icons/info_icon.svg"
 
 import { Grid } from "@mui/material"
 import Config from "../../../config"
@@ -93,7 +92,7 @@ export default function FittingPanel() {
               <div className="h-[124px] relative">
                 <img src={FittingAll} />
                 <div className="absolute right-0 top-0 cursor-target">
-                  <InfoIcon />
+                  <img src={InfoIcon} />
                 </div>
               </div>
               <button
@@ -116,7 +115,7 @@ export default function FittingPanel() {
               <div className="h-[124px] relative">
                 <img src={FittingRight} />
                 <div className="absolute right-0 top-0 cursor-target">
-                  <InfoIcon />
+                  <img src={InfoIcon} />
                 </div>
               </div>
               <button
@@ -162,7 +161,7 @@ export default function FittingPanel() {
               <div className="h-[124px] relative">
                 <img src={FittingTop} />
                 <div className="absolute right-0 top-0 cursor-target">
-                  <InfoIcon />
+                  <img src={InfoIcon} />
                 </div>
               </div>
               <button

@@ -194,49 +194,44 @@ const getDrawerDepth = (type, depth) => {
   return depthRange[index] // Returns the last depth if no depth found
 }
 
-const getDraggingInfo = (args) => {
-  const {
-    type,
-    top,
-    bottom,
-    topAsset,
-    bottomAsset,
-    initialPosY,
-    raster,
-    availableWidth,
-    objectHeight,
-  } = args
+const getDraggingInfo = ({
+  type,
+  top,
+  bottom,
+  topAsset,
+  bottomAsset,
+  initialPosY,
+  raster,
+  availableWidth,
+  objectHeight,
+}) => {
+
+  const {shelf, foldBottom, glassBottom, pantsPullout, clothesRail, clothesLift, drawer, internalDrawer, slopingFloor} = Config.furnishing.type;
 
   let posY = initialPosY
-
   let objectWidth = availableWidth
-
   let topVisible = true
   let bottomVisible = true
   let topConnected = false
   let bottomConnected = false
 
   if (
-    type === Config.furnishing.type.shelf ||
-    type === Config.furnishing.type.foldBottom ||
-    type === Config.furnishing.type.glassBottom ||
-    type === Config.furnishing.type.pantsPullout
+    type === shelf ||
+    type === foldBottom ||
+    type === glassBottom ||
+    type === pantsPullout
   ) {
     if (posY > top) posY = top
 
-    posY =
-      bottom + Math.floor((posY - bottom) / raster) * raster + objectHeight / 2
+    posY = bottom + Math.floor((posY - bottom) / raster) * raster + objectHeight / 2
 
     objectWidth = availableWidth - Config.furnishing.default.spaceSides * 2
-  } else if (type === Config.furnishing.type.slopingFloor) {
+  } else if (type === slopingFloor) {
     if (posY > top) posY = top
     else posY = bottom + Math.floor((posY - bottom) / raster) * raster
 
     objectWidth = availableWidth
-  } else if (
-    type === Config.furnishing.type.clothesRail ||
-    type === Config.furnishing.type.clothesLift
-  ) {
+  } else if (type === clothesRail || type === clothesLift) {
     if (posY > top) posY = top + objectHeight / 2
     else
       posY =
@@ -245,14 +240,10 @@ const getDraggingInfo = (args) => {
         objectHeight / 2
 
     objectWidth = availableWidth
-  } else if (
-    type === Config.furnishing.type.drawer ||
-    type === Config.furnishing.type.internalDrawer
-  ) {
-    const bottomShelfDistance =
-      type === Config.furnishing.type.drawer
-        ? Config.furnishing.drawer.bottomShelfDistance
-        : Config.furnishing.internalDrawer.bottomShelfDistance
+  } else if (type === drawer || type === internalDrawer) {
+    const bottomShelfDistance = type === drawer
+      ? Config.furnishing.drawer.bottomShelfDistance
+      : Config.furnishing.internalDrawer.bottomShelfDistance
     if (
       posY >
       top +
@@ -276,10 +267,7 @@ const getDraggingInfo = (args) => {
           bottomShelfDistance +
           objectHeight / 2
 
-        if (
-          topAsset === Config.furnishing.type.drawer ||
-          topAsset === Config.furnishing.type.internalDrawer
-        ) {
+        if (topAsset === drawer || topAsset === internalDrawer) {
           topVisible = false
           topConnected = true
         } else {
@@ -306,8 +294,8 @@ const getDraggingInfo = (args) => {
           objectHeight / 2
 
         if (
-          bottomAsset === Config.furnishing.type.drawer ||
-          bottomAsset === Config.furnishing.type.internalDrawer
+          bottomAsset === drawer ||
+          bottomAsset === internalDrawer
         ) {
           bottomVisible = false
           bottomConnected = true
@@ -338,9 +326,9 @@ const getDraggingInfo = (args) => {
       bottomConnected = false
     }
 
-    if (type === Config.furnishing.type.drawer) {
+    if (type === drawer) {
       objectWidth = availableWidth - Config.furnishing.drawer.sideIncident * 2
-    } else if (type === Config.furnishing.type.internalDrawer) {
+    } else if (type === internalDrawer) {
       objectWidth =
         availableWidth -
         Config.furnishing.internalDrawer.panelWidth * 2 -

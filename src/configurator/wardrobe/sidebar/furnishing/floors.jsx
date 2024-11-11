@@ -1,14 +1,14 @@
-import ProductCard from "../../common/productCard"
-import Config from "../../../config"
-import useDimensionStore from "../../zustand/dimensionStore"
+import Config from "../../../config";
+import ProductCard from "../../common/productCard";
+import useDimensionStore from "../../zustand/dimensionStore";
+
 export default function Floors() {
-  const shelf = useDimensionStore.use.shelf()
+  const shelf = useDimensionStore.use.shelf();
   return (
     <div>
       <div className="text-[#000] font-[16px] px-[26px] mb-5">
-        Hier können Sie verschiedenen Böden
-        in das Möbel ziehen und dabei je nach
-        Bedarf unterschiedliche stärken wählen.
+        Hier können Sie verschiedenen Böden in das Möbel ziehen und dabei je nach Bedarf
+        unterschiedliche stärken wählen.
       </div>
       <div className="grid grid-cols-2 gap-4">
         {shelf.value.shelf && (
@@ -45,5 +45,5 @@ export default function Floors() {
         )}
       </div>
     </div>
-  )
+  );
 }

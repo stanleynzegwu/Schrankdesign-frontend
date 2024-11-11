@@ -1,4 +1,4 @@
-// import { useEffect, useState } from "react";
+// import React, {useEffect, useState} from "react";
 // import ConfigRiview from "../../../components/productDetail/configReiview";
 // import Mark from "../../../components/productDetail/mark";
 // import Frame from "./frame";
@@ -41,24 +41,25 @@
 // ];
 
 // export default function Corner(props) {
-//   const { configId } = props; // slug
-//   const { stars, title } = reviewsData;
-//   const [rating, setRating] = useState();
-//   const [imagesIndex, setImagesIndex] = useState();
-//   // const [productDescription, setProductDescription] = useState()
-//   const [detailImage, setDetailImage] = useState();
-//   const [detailImg, setDetailImg] = useState([]);
-//   // const [productName, setProductName] = useState()
+//   const { configId, slug } = props
+//   const {stars, title} = reviewsData
+//   const [rating, setRating] = useState()
+//   const [imagesIndex, setImagesIndex] = useState()
+//   const [productDescription, setProductDescription] = useState()
+//   const [detailImage, setDetailImage] = useState()
+//   const [detailImg, setDetailImg] = useState([])
+//   const [productName, setProductName] = useState()
 
-//   const [productInfo, setProductInfo] = useState({});
+//   const [productInfo, setProductInfo] = useState({})
 
 //   useEffect(() => {
-//     let tempdetailImg = [];
-//     for (let i = 8 * imagesIndex; i < 8 * imagesIndex + 8; i++) {
-//       tempdetailImg.push(detailImage[i]);
+//     let tempdetailImg = []
+//     for ( let i = 8*imagesIndex; i < (8*imagesIndex+8); i++) {
+//       tempdetailImg.push(detailImage[i])
 //     }
-//     setDetailImg(tempdetailImg);
-//   }, [detailImage, imagesIndex]);
+//     // console.log(detailImage)
+//     setDetailImg(tempdetailImg)
+//   }, [detailImage, imagesIndex])
 
 //   useEffect(() => {
 //     const getProduct = async () => {
@@ -66,29 +67,29 @@
 //       const { data, error } = await GetSingleProduct(configId);
 //       if (data) {
 //         setRating(data?.product?.rating);
-//         setImagesIndex(data?.product?.imagesIndex);
-//         // setProductDescription(data?.product?.productDescription)
-//         const detailImages = data?.product.detailImages;
-//         const length = Number(detailImages[detailImages.length - 1].pos);
-//         let tempFileList = [];
-//         for (let i = 0; i < length + 1; i++) {
-//           let flag = true;
-//           detailImages.map((image) => {
+//         setImagesIndex(data?.product?.imagesIndex)
+//         setProductDescription(data?.product?.productDescription)
+//         const detailImages = data?.product.detailImages
+//         const length = Number(detailImages[detailImages.length-1].pos)
+//         let tempFileList = []
+//         for (let i = 0; i < length+1; i++) {
+//           let flag = true
+//           detailImages.map((image, index) => {
 //             if (Number(image.pos) === i) {
-//               tempFileList.push(image.image);
-//               flag = false;
+//               tempFileList.push(image.image)
+//               flag = false
 //             }
-//           });
+//           })
 //           if (flag) {
-//             tempFileList.push(undefined);
+//             tempFileList.push(undefined)
 //           }
 //         }
-//         setDetailImage(tempFileList);
+//         setDetailImage(tempFileList)
 //         setProductInfo({
 //           name: data?.product?.name,
 //           description: data?.product?.productDescription,
-//           number: configId,
-//         });
+//           number: configId
+//         })
 //         // setProductName(data?.product?.)
 //         // setPageLoading(false);
 //       } else if (error) {
@@ -105,10 +106,16 @@
 //       <div className="flex px-4" id="galery">
 //         <ConfigRiview stars={rating ? rating : stars} title={title} />
 //         {markData.map(({ id, img, title, description }) => (
-//           <Mark key={id} img={imgUrl + img} title={title} description={description} id={id} />
+//           <Mark
+//             key={id}
+//             img={imgUrl + img}
+//             title={title}
+//             description={description}
+//             id={id}
+//           />
 //         ))}
 //       </div>
-//       <Frame imagesIndex={imagesIndex} setImagesIndex={setImagesIndex} detailImg={detailImg} />
+//       <Frame imagesIndex={imagesIndex} setImagesIndex={setImagesIndex} detailImg={detailImg}/>
 //       <ProductDetail product={productInfo} />
 //       <Slide />
 //     </>

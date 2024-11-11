@@ -14,7 +14,7 @@ import useDimensionStore from "../../zustand/dimensionStore";
 
 export default function Griffes() {
   const [handlelist, setHandlelist] = useState([]);
-  // const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [xIndex, setXIndex] = useState(0);
   const [colorIndex, setColorIndex] = useState(-1);
   const setHandle = useDimensionStore.use.setHandle();
@@ -22,7 +22,7 @@ export default function Griffes() {
   const setHandleDirection = useDimensionStore.use.setHandleDirection();
   const setHandleIndex = useDimensionStore.use.setHandleIndex();
   const setHandleListIndex = useDimensionStore.use.setHandleListIndex();
-  // const pushOpen = useDimensionStore.use.pushOpen()
+  const pushOpen = useDimensionStore.use.pushOpen()
   const setPushOpen = useDimensionStore.use.setPushOpen()
 
   const griffe = useDimensionStore.use.griffe()
@@ -34,11 +34,11 @@ export default function Griffes() {
   //   { label: "Mit Griff", value: "griff" },
   // ];
 
-  // const griff_tab_data = [
-  //   { label: "Edelstahl", value: "stainless_steel" },
-  //   { label: "Weiß", value: "white" },
-  //   { label: "Schwarz", value: "black" },
-  // ];
+  const griff_tab_data = [
+    { label: "Edelstahl", value: "stainless_steel" },
+    { label: "Weiß", value: "white" },
+    { label: "Schwarz", value: "black" },
+  ];
   useEffect(() => {
     let temp = []
     if (griffe.value.push) {
@@ -69,10 +69,11 @@ export default function Griffes() {
           setHandlelist(data.data);
           setHandle(data.data);
         }
-        // setIsLoading(false);
+        setIsLoading(false);
       }
       if (error) {
-        // setIsLoading(false);
+        console.log(error?.message);
+        setIsLoading(false);
       }
     };
     GetDrawer();
@@ -84,7 +85,7 @@ export default function Griffes() {
   const xIndexSet = (index) => {
     setXIndex(index);
   };
-  // const [griffActiveTab, setGriffActiveTab] = useState(griff_tab_data[0].value);
+  const [griffActiveTab, setGriffActiveTab] = useState(griff_tab_data[0].value);
   return (
     <>
       {activeTab && (
@@ -133,7 +134,8 @@ export default function Griffes() {
                   <div>
                     <div className="flex flex-row">
                       <div className="flex justify-center items-center mr-[15px]">
-                        <img src={RotateIcon} 
+                        <img 
+                          src={RotateIcon} 
                           className="cursor-pointer"
                           onClick={() => {
                             handleDirection === "V" ? setHandleDirection("H") : setHandleDirection("V")

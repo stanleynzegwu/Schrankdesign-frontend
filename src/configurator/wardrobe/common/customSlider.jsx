@@ -1,7 +1,6 @@
 import { Grid, Slider, Typography, styled } from "@mui/material"
 
-const boxShadow =
-  "0 3px 1px rgba(0,0,0,0.1),0 4px 8px rgba(0,0,0,0.13),0 0 0 1px rgba(0,0,0,0.02)"
+const boxShadow = "0 3px 1px rgba(0,0,0,0.1),0 4px 8px rgba(0,0,0,0.13),0 0 0 1px rgba(0,0,0,0.02)"
 
 const MySlider = styled(Slider)(({ theme }) => ({
   color: theme.palette.mode === "dark" ? "#0a84ff" : "#007bff",

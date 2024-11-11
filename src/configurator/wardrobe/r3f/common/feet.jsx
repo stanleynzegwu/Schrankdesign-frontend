@@ -15,9 +15,9 @@ export function FeetModel(props) {
   const groupRef = useRef()
   return (
     <>
-    <group ref={groupRef} position={offSet}>
-      <primitive dispose={null} object={model} position={position} scale={[scale, scale, scale]} rotation={rotation}/>
-    </group>
+      <group ref={groupRef} position={offSet}>
+        <primitive dispose={null} object={model} position={position} scale={[scale, scale, scale]} rotation={rotation}/>
+      </group>
     </>
   )
 }

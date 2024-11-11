@@ -1,5 +1,5 @@
-import { useEffect } from "react";
-// import Switch from "react-switch";
+import { useCallback, useEffect } from "react";
+import Switch from "react-switch";
 
 import WardrobeShape from "../../../../assets/icons/Wardrobe-Shape.png";
 import OuterShape from "../../../../assets/icons/Outer-Shape.png"
@@ -7,9 +7,7 @@ import TopShape from "../../../../assets/icons/Top-Shape.png"
 import UShape from "../../../../assets/icons/U-Shape.png"
 import InnerShape from "../../../../assets/icons/Inner-Shape.png"
 import FullInnerShape from "../../../../assets/icons/Full-Inner-Shape.png"
-// import InfoIcon from "../../../../assets/icons/info_icon.svg";
-
-import { InfoIcon } from "@src/components/icons";
+import InfoIcon from "../../../../assets/icons/info_icon.svg";
 
 import { Grid } from "@mui/material";
 import Config from "../../../config";
@@ -17,9 +15,9 @@ import useDimensionStore from "../../zustand/dimensionStore";
 
 export default function KorpusFrom() {
   const korpusFormA = useDimensionStore.use.korpusFormA()
-  // const korpusForm = useDimensionStore.use.korpusForm();
+  const korpusForm = useDimensionStore.use.korpusForm();
   const korpusType = useDimensionStore.use.korpusType();
-  // const setKorpusForm = useDimensionStore.use.setKorpusForm();
+  const setKorpusForm = useDimensionStore.use.setKorpusForm();
   const setKorpusType = useDimensionStore.use.setKorpusType();
   const setKorpusMaterial = useDimensionStore.use.setKorpusMaterial();
   useEffect(() => {
@@ -59,7 +57,7 @@ export default function KorpusFrom() {
               <div className="h-[124px] relative">
                 <img src={WardrobeShape} alt="Wardrobe Shape" />
                 <div className="absolute right-0 top-0 cursor-target">
-                  <InfoIcon />
+                  <img src={InfoIcon} />
                 </div>
               </div>
               <button
@@ -85,7 +83,7 @@ export default function KorpusFrom() {
               <div className="h-[124px] relative">
               <img src={OuterShape} alt="Wardrobe Shape" />
                 <div className="absolute right-0 top-0 cursor-target">
-                  <InfoIcon />
+                  <img src={InfoIcon} />
                 </div>
               </div>
               <button
@@ -111,7 +109,7 @@ export default function KorpusFrom() {
               <div className="h-[124px] relative">
               <img src={TopShape} alt="Wardrobe Shape" />
                 <div className="absolute right-0 top-0 cursor-target">
-                  <InfoIcon />
+                  <img src={InfoIcon} />
                 </div>
               </div>
               <button
@@ -137,7 +135,7 @@ export default function KorpusFrom() {
               <div className="h-[124px] relative">
               <img src={UShape} alt="Wardrobe Shape" />
                 <div className="absolute right-0 top-0 cursor-target">
-                  <InfoIcon />
+                  <img src={InfoIcon} />
                 </div>
               </div>
               <button
@@ -148,6 +146,7 @@ export default function KorpusFrom() {
                     : { background: "#BDBCBC" }
                 }
                 onClick={() => {
+                  // console.log("here")
                   setKorpusType(Config.korpusType.uShap);
                   setKorpusMaterial(true);
                 }}
@@ -163,7 +162,7 @@ export default function KorpusFrom() {
               <div className="h-[124px] relative">
               <img src={InnerShape} alt="Wardrobe Shape" />
                 <div className="absolute right-0 top-0 cursor-target">
-                  <InfoIcon />
+                  <img src={InfoIcon} />
                 </div>
               </div>
               <button
@@ -189,7 +188,7 @@ export default function KorpusFrom() {
               <div className="h-[124px] relative">
               <img src={FullInnerShape} alt="Wardrobe Shape" />
                 <div className="absolute right-0 top-0 cursor-target">
-                  <InfoIcon />
+                  <img src={InfoIcon} />
                 </div>
               </div>
               <button

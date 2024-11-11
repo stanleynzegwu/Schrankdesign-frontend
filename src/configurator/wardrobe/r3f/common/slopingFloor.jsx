@@ -18,7 +18,6 @@ const SlopingFloor = React.memo(function SlopingFloor(props) {
   )
 
   return (
-    // eslint-disable-next-line react/no-unknown-property
     <group visible={visible} rotation-x={slopingConfig.angle}>
       {/* floor */}
       <Plate

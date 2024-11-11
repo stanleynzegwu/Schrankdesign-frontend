@@ -1,89 +1,84 @@
-import { useEffect, useState } from "react"
-import { Button } from "@material-tailwind/react"
-import { Fragment } from "react"
+import { useEffect, useState } from "react";
+import { Button } from "@material-tailwind/react";
+import { Fragment } from "react";
 
-import Config from "../../../config"
-import { formatNumber } from "../../utils/formatNumber"
+import Config from "../../../config";
+import { formatNumber } from "../../utils/formatNumber";
 
-import PlusIcon from "../../../../assets/icons/plus_icon.svg"
-import MinusIcon from "../../../../assets/icons/minus_icon.svg"
-import SpliteIcon from "../../../../assets/icons/splite_icon.svg"
-import CustomSlider1 from "../../common/customSlider1"
-import InputSlider from "../../common/inputSlider"
-import useDimensionStore from "../../zustand/dimensionStore"
+import PlusIcon from "../../../../assets/icons/plus_icon.svg";
+import MinusIcon from "../../../../assets/icons/minus_icon.svg";
+import SpliteIcon from "../../../../assets/icons/splite_icon.svg";
+import CustomSlider1 from "../../common/customSlider1";
+import InputSlider from "../../common/inputSlider";
+import useDimensionStore from "../../zustand/dimensionStore";
 
 export default function ElementWidth() {
-  const width = useDimensionStore.use.width()
-  const elementsCount = useDimensionStore.use.elementsCount()
-  const manual = useDimensionStore.use.manual()
-  const elementsWidths = useDimensionStore.use.elementsWidths()
-  const setWidth = useDimensionStore.use.setWidth()
-  const setManual = useDimensionStore.use.setManual()
-  const setElementsCount = useDimensionStore.use.setElementsCount()
-  const setElementsWidths = useDimensionStore.use.setElementsWidths()
-  const eWidthsFixed = useDimensionStore.use.eWidthsFixed()
-  const setEWidthsFixed = useDimensionStore.use.setEWidthsFixed()
-  const minLength = useDimensionStore.use.minLength()
+  const width = useDimensionStore.use.width();
+  const elementsCount = useDimensionStore.use.elementsCount();
+  const manual = useDimensionStore.use.manual();
+  const elementsWidths = useDimensionStore.use.elementsWidths();
+  const setWidth = useDimensionStore.use.setWidth();
+  const setManual = useDimensionStore.use.setManual();
+  const setElementsCount = useDimensionStore.use.setElementsCount();
+  const setElementsWidths = useDimensionStore.use.setElementsWidths();
+  const eWidthsFixed = useDimensionStore.use.eWidthsFixed();
+  const setEWidthsFixed = useDimensionStore.use.setEWidthsFixed();
+  const minLength = useDimensionStore.use.minLength();
 
-  const [tempEWidths, setTempEWidths] = useState()
-  const [tempECount, setTempECount] = useState(elementsCount)
+  const [tempEWidths, setTempEWidths] = useState();
+  const [tempECount, setTempECount] = useState(elementsCount);
 
-  const [showWidths, setShowWidths] = useState(false)
-  const [countRange, setCountRange] = useState({ min: 2, max: 7 })
+  const [showWidths, setShowWidths] = useState(false);
+  const [countRange, setCountRange] = useState({ min: 2, max: 7 });
   useEffect(() => {
-    let remainedWidth = width - Config.plate.thickness
-    let fixedCount = 0
+    let remainedWidth = width - Config.plate.thickness;
+    let fixedCount = 0;
     elementsWidths.forEach((item, index) => {
       if (eWidthsFixed[index]) {
-        remainedWidth = remainedWidth - item - Config.plate.thickness
-        fixedCount++
+        remainedWidth = remainedWidth - item - Config.plate.thickness;
+        fixedCount++;
       }
-    })
+    });
     setCountRange({
       min:
-        Math.ceil(
-          remainedWidth /
-            (Config.plate.maxDoubleDoorLength + Config.plate.thickness)
-        ) + fixedCount,
-      max:
-        Math.floor(
-          remainedWidth / (minLength + Config.plate.thickness)
-        ) + fixedCount,
-    })
-    setTempECount(elementsCount)
-    setTempEWidths(elementsWidths)
-  }, [width, elementsWidths, eWidthsFixed, minLength])
+        Math.ceil(remainedWidth / (Config.plate.maxDoubleDoorLength + Config.plate.thickness)) +
+        fixedCount,
+      max: Math.floor(remainedWidth / (minLength + Config.plate.thickness)) + fixedCount,
+    });
+    setTempECount(elementsCount);
+    setTempEWidths(elementsWidths);
+  }, [width, elementsWidths, eWidthsFixed, minLength]);
 
   const initializeElements = (count) => {
-    if (count < 1) return
-    const elements = []
-    let expectedWidth = 0
+    if (count < 1) return;
+    const elements = [];
+    let expectedWidth = 0;
 
     for (let index = 0; index < count; index++) {
       if (eWidthsFixed[index]) {
-        elements.push(Number(tempEWidths[index]))
+        elements.push(Number(tempEWidths[index]));
       } else {
-        elements.push(Config.plate.minDoorLength)
+        elements.push(Config.plate.minDoorLength);
       }
-      expectedWidth += elements[index] + Config.plate.thickness
+      expectedWidth += elements[index] + Config.plate.thickness;
     }
 
-    expectedWidth += Config.plate.thickness
+    expectedWidth += Config.plate.thickness;
 
-    setElementsWidths(elements)
-    setTempEWidths(elements.map((value) => value.toFixed(1)))
+    setElementsWidths(elements);
+    setTempEWidths(elements.map((value) => value.toFixed(1)));
 
-    setElementsCount(elements.length)
-    setTempECount(elements.length)
+    setElementsCount(elements.length);
+    setTempECount(elements.length);
 
-    setWidth(expectedWidth)
-  }
+    setWidth(expectedWidth);
+  };
 
   const handleElements = (currentIndex, value, fixedArray) => {
-    if (elementsWidths[currentIndex] == value) return
+    if (elementsWidths[currentIndex] == value) return;
 
-    let widthRemainder = width
-    let fixedCount = 0
+    let widthRemainder = width;
+    let fixedCount = 0;
 
     for (let index = 0; index < elementsCount; index++) {
       // current value is already fixed
@@ -91,222 +86,204 @@ export default function ElementWidth() {
         widthRemainder =
           widthRemainder -
           (index == currentIndex ? value : elementsWidths[index]) -
-          Config.plate.thickness
-        fixedCount++
+          Config.plate.thickness;
+        fixedCount++;
       }
     }
 
-    if (
-      widthRemainder <
-      Config.plate.minDoorLength + 2 * Config.plate.thickness
-    ) {
+    if (widthRemainder < Config.plate.minDoorLength + 2 * Config.plate.thickness) {
       if (fixedCount == elementsCount) {
-        initializeElements(elementsCount)
+        initializeElements(elementsCount);
       } else {
-        initializeElements(elementsCount - 1)
+        initializeElements(elementsCount - 1);
       }
     } else {
-      let remainedCount = elementsCount - fixedCount
+      let remainedCount = elementsCount - fixedCount;
       while (
         remainedCount > 0 &&
-        ((widthRemainder - Config.plate.thickness) / remainedCount -
-          Config.plate.thickness <
+        ((widthRemainder - Config.plate.thickness) / remainedCount - Config.plate.thickness <
           Config.plate.minDoorLength ||
-          (widthRemainder - Config.plate.thickness) / remainedCount -
-            Config.plate.thickness >
+          (widthRemainder - Config.plate.thickness) / remainedCount - Config.plate.thickness >
             Config.plate.maxDoubleDoorLength)
       ) {
-        remainedCount--
+        remainedCount--;
       }
 
       if (currentIndex >= remainedCount + fixedCount) {
         // initialize with minimum door length
-        console.log("initialize with minimum door length")
-        initializeElements(currentIndex)
+        // console.log("initialize with minimum door length")
+        initializeElements(currentIndex);
       } else {
         const elementDistance = Number(
           (
             (widthRemainder - Config.plate.thickness) / remainedCount -
             Config.plate.thickness
           ).toFixed(1)
-        )
+        );
 
-        const elements = []
+        const elements = [];
         for (let i = 0; i < remainedCount + fixedCount; i++) {
           if (fixedArray[i]) {
-            elements.push(i == currentIndex ? value : elementsWidths[i])
+            elements.push(i == currentIndex ? value : elementsWidths[i]);
           } else {
-            elements.push(elementDistance)
+            elements.push(elementDistance);
           }
         }
 
-        setElementsWidths(elements)
-        setTempEWidths(elements.map((value) => value.toFixed(1)))
+        setElementsWidths(elements);
+        setTempEWidths(elements.map((value) => value.toFixed(1)));
 
-        setElementsCount(elements.length)
-        setTempECount(elements.length)
+        setElementsCount(elements.length);
+        setTempECount(elements.length);
       }
     }
-  }
+  };
 
   const handleECounts = (eCount) => {
-    if (eCount == elementsCount) return true
+    if (eCount == elementsCount) return true;
 
-    let widthRemainder = width
-    let fixedCount = 0
+    let widthRemainder = width;
+    let fixedCount = 0;
 
     for (let index = 0; index < eCount; index++) {
       if (eWidthsFixed[index]) {
-        widthRemainder =
-          widthRemainder - elementsWidths[index] - Config.plate.thickness
-        fixedCount++
+        widthRemainder = widthRemainder - elementsWidths[index] - Config.plate.thickness;
+        fixedCount++;
       }
     }
 
     if (eCount == fixedCount) {
-      initializeElements(eCount)
+      initializeElements(eCount);
     } else {
       const expectedDistance = Number(
         (
           (widthRemainder - Config.plate.thickness) / (eCount - fixedCount) -
           Config.plate.thickness
         ).toFixed(1)
-      )
+      );
 
       // update actual elementsCount if width is between min and max door length
       if (
         expectedDistance >= Config.plate.minDoorLength &&
         expectedDistance <= Config.plate.maxDoubleDoorLength
       ) {
-        const elements = []
+        const elements = [];
         for (let index = 0; index < eCount; index++) {
           if (eWidthsFixed[index]) {
-            elements.push(elementsWidths[index])
+            elements.push(elementsWidths[index]);
           } else {
-            elements.push(expectedDistance)
+            elements.push(expectedDistance);
           }
         }
 
-        setTempEWidths(elements.map((value) => value.toFixed(1)))
-        setElementsWidths(elements)
+        setTempEWidths(elements.map((value) => value.toFixed(1)));
+        setElementsWidths(elements);
 
-        setElementsCount(eCount)
+        setElementsCount(eCount);
       } else if (expectedDistance < Config.plate.minDoorLength) {
         //adjustment while deceasing eCount
-        let count = eCount
+        let count = eCount;
         while (
           (widthRemainder - Config.plate.thickness) / (count - fixedCount) -
             Config.plate.thickness <
           Config.plate.minDoorLength
         )
-          count--
+          count--;
 
         const adjustedDistance = Number(
           (
             (widthRemainder - Config.plate.thickness) / (count - fixedCount) -
             Config.plate.thickness
           ).toFixed(1)
-        )
+        );
 
-        const elements = []
+        const elements = [];
         for (let index = 0; index < count; index++) {
           if (eWidthsFixed[index]) {
-            elements.push(elementsWidths[index])
+            elements.push(elementsWidths[index]);
           } else {
-            elements.push(adjustedDistance)
+            elements.push(adjustedDistance);
           }
         }
 
-        setTempEWidths(elements.map((value) => value.toFixed(1)))
-        setElementsWidths(elements)
+        setTempEWidths(elements.map((value) => value.toFixed(1)));
+        setElementsWidths(elements);
 
-        setTempECount(count)
-        setElementsCount(count)
+        setTempECount(count);
+        setElementsCount(count);
       } else {
-        return false
+        return false;
       }
     }
 
-    return true
-  }
+    return true;
+  };
 
   const onHandleCountBlur = (value) => {
     if (!manual) {
-      setManual(true)
+      setManual(true);
     }
 
-    if (value < 1) alert("Only more than 1 elements should exist.")
+    if (value < 1) alert("Only more than 1 elements should exist.");
     else {
-      const count = parseInt(value)
-      setTempECount(count)
-      const result = handleECounts(count)
+      const count = parseInt(value);
+      setTempECount(count);
+      const result = handleECounts(count);
       if (!result) {
-        alert(
-          "Adjust number of elements so door length should be between 25 and 60"
-        )
+        alert("Adjust number of elements so door length should be between 25 and 60");
       }
     }
-  }
+  };
 
   const onHandleWidthBlur = (value, index) => {
-    if (
-      value >= minLength &&
-      value <= Config.plate.maxDoubleDoorLength
-    ) {
+    if (value >= minLength && value <= Config.plate.maxDoubleDoorLength) {
       if (!manual) {
-        setManual(true)
+        setManual(true);
       }
 
-      const fixedArray = [...eWidthsFixed]
+      const fixedArray = [...eWidthsFixed];
       if (value != elementsWidths[index]) {
-        fixedArray[index] = true
-        setEWidthsFixed(fixedArray)
+        fixedArray[index] = true;
+        setEWidthsFixed(fixedArray);
       }
 
-      const temp = formatNumber(value)
+      const temp = formatNumber(value);
       setTempEWidths(
-        tempEWidths.map((origin, indexL) =>
-          indexL == index ? temp.toFixed(1) : origin
-        )
-      )
-      handleElements(index, temp, fixedArray)
+        tempEWidths.map((origin, indexL) => (indexL == index ? temp.toFixed(1) : origin))
+      );
+      handleElements(index, temp, fixedArray);
     } else {
-      alert("Element width should be between"+ minLength +" and 120")
+      alert("Element width should be between" + minLength + " and 120");
     }
-  }
+  };
 
   const handleEqualElement = () => {
-    setEWidthsFixed(Array(elementsCount).fill(false))
+    setEWidthsFixed(Array(elementsCount).fill(false));
 
     const expectedDistance = Number(
-      (
-        (width - Config.plate.thickness) / elementsCount -
-        Config.plate.thickness
-      ).toFixed(1)
-    )
+      ((width - Config.plate.thickness) / elementsCount - Config.plate.thickness).toFixed(1)
+    );
 
-    const elements = []
+    const elements = [];
     for (let index = 0; index < elementsCount; index++) {
-      elements.push(expectedDistance)
+      elements.push(expectedDistance);
     }
 
-    setTempEWidths(elements.map((value) => value.toFixed(1)))
-    setElementsWidths(elements)
-  }
+    setTempEWidths(elements.map((value) => value.toFixed(1)));
+    setElementsWidths(elements);
+  };
 
   return (
     <div>
       <div className="px-10 mt-2 mb-5">
         <div className="flex flex-row justify-between items-center mb-3">
-          <div className="text-[#456779] text-3xl/none font-bold">
-            Anzahl-Spalten
-          </div>
+          <div className="text-[#456779] text-3xl/none font-bold">Anzahl-Spalten</div>
           <input
             type="number"
             className="w-[37px] h-[37px] font-bold text-center rounded-[5px] border-[1px] border-[#545454] bg-[#FFF] text-xl text-[#000]"
             value={tempECount}
             onChange={(e) => {
-              setTempECount(e.target.value)
+              setTempECount(e.target.value);
             }}
             onBlur={(e) => onHandleCountBlur(e.target.value)}
           />
@@ -315,9 +292,9 @@ export default function ElementWidth() {
           <button
             className="w-[37px] h-[37px] p-[0px] bg-transparent flex-none rounded-[5px] border-[1px] border-[#545454]"
             onClick={() => {
-              if (tempECount - 1 < countRange.min) return
-              setTempECount(tempECount - 1)
-              onHandleCountBlur(tempECount - 1)
+              if (tempECount - 1 < countRange.min) return;
+              setTempECount(tempECount - 1);
+              onHandleCountBlur(tempECount - 1);
             }}
           >
             <img src={MinusIcon} className="w-[37px]" />
@@ -329,12 +306,13 @@ export default function ElementWidth() {
             min={countRange.min}
             max={countRange.max}
           />
+          {/* {console.log(countRange)} */}
           <button
             className="w-[37px] h-[37px] p-[0px] bg-transparent flex-none rounded-[5px] border-[1px] border-[#545454]"
             onClick={() => {
-              if (tempECount + 1 > countRange.max) return
-              setTempECount(tempECount + 1)
-              onHandleCountBlur(tempECount + 1)
+              if (tempECount + 1 > countRange.max) return;
+              setTempECount(tempECount + 1);
+              onHandleCountBlur(tempECount + 1);
             }}
           >
             <img src={PlusIcon} className="w-[37px]" />
@@ -382,29 +360,22 @@ export default function ElementWidth() {
             .fill(0)
             .map((item, index) => (
               <Fragment key={index}>
-                <div className="text-[#456779] text-xl/none font-bold mt-3">
-                  Spalte {index + 1}
-                </div>
+                <div className="text-[#456779] text-xl/none font-bold mt-3">Spalte {index + 1}</div>
                 <div className="flex gap-x-12 mt-1 items-center">
                   <button
                     className="w-[29px] h-[29px] p-[0px] mt-1 flex-none justify-center bg-transparent rounded-[5px] border-[1px] border-[#545454]"
                     onClick={() => {
-                      if (
-                        Number(tempEWidths[index]) - 1 <
-                        minLength
-                      ) {
-                        alert("Element width should be between"+ minLength +" and 120")
-                        return
+                      if (Number(tempEWidths[index]) - 1 < minLength) {
+                        alert("Element width should be between" + minLength + " and 120");
+                        return;
                       }
 
                       setTempEWidths(
                         tempEWidths.map((origin, indexL) =>
-                          indexL == index
-                            ? Number(tempEWidths[index]) - 1
-                            : origin
+                          indexL == index ? Number(tempEWidths[index]) - 1 : origin
                         )
-                      )
-                      onHandleWidthBlur(Number(tempEWidths[index]) - 1, index)
+                      );
+                      onHandleWidthBlur(Number(tempEWidths[index]) - 1, index);
                     }}
                   >
                     <img src={MinusIcon} className="w-[21px] ml-[3px]" />
@@ -413,23 +384,23 @@ export default function ElementWidth() {
                     aria-label="width"
                     value={tempEWidths[index]}
                     onChange={(e) => {
-                        setTempEWidths(
-                          tempEWidths.map((origin, indexL) =>
-                            indexL == index ? e.target.value : origin
-                          )
+                      // console.log(e.target.value)
+                      setTempEWidths(
+                        tempEWidths.map((origin, indexL) =>
+                          indexL == index ? e.target.value : origin
                         )
+                      );
                     }}
                     onBlur={(e) => {
-                      if ( tempEWidths[index] < minLength) {
+                      if (tempEWidths[index] < minLength) {
                         setTempEWidths(
                           tempEWidths.map((origin, indexL) =>
                             indexL == index ? minLength : origin
                           )
-                        )
-                        onHandleWidthBlur(minLength, index)
-                        alert("Element width should be between"+ minLength +" and 120")
-                      } else
-                        onHandleWidthBlur(e.target.value, index)
+                        );
+                        onHandleWidthBlur(minLength, index);
+                        alert("Element width should be between" + minLength + " and 120");
+                      } else onHandleWidthBlur(e.target.value, index);
                     }}
                     min={minLength}
                     max={Config.plate.maxDoubleDoorLength}
@@ -438,22 +409,16 @@ export default function ElementWidth() {
                   <button
                     className="w-[29px] h-[29px] p-[0px] mt-1 flex-none justify-center bg-transparent rounded-[5px] border-[1px] border-[#545454]"
                     onClick={() => {
-                      if (
-                        Number(tempEWidths[index]) + 1 >
-                        Config.plate.maxDoubleDoorLength
-                      )
-                        return
+                      if (Number(tempEWidths[index]) + 1 > Config.plate.maxDoubleDoorLength) return;
 
                       setTempEWidths(
                         tempEWidths.map((origin, indexL) =>
-                          indexL == index
-                            ? Number(tempEWidths[index]) + 1
-                            : origin
+                          indexL == index ? Number(tempEWidths[index]) + 1 : origin
                         )
-                      )
-                      onHandleWidthBlur(Number(tempEWidths[index]) + 1, index)
+                      );
+                      onHandleWidthBlur(Number(tempEWidths[index]) + 1, index);
                     }}
-                  >   
+                  >
                     <img src={PlusIcon} className="w-[21px] ml-[3px]" />
                   </button>
                 </div>
@@ -482,5 +447,5 @@ export default function ElementWidth() {
         </div>
       )}
     </div>
-  )
+  );
 }

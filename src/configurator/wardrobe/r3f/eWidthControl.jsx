@@ -1,146 +1,118 @@
-/* eslint-disable react/no-unknown-property */
-import React, { useCallback, useMemo, useRef, useState } from "react"
-import Config from "../../config"
-import { Plane } from "@react-three/drei"
-import { useLoader, useThree } from "@react-three/fiber"
-import * as THREE from "three"
-import { createUseGesture, dragAction, pinchAction } from "@use-gesture/react"
-import useDimensionStore from "../zustand/dimensionStore"
-import useCornerStore from "../zustand/cornerStore"
+import * as THREE from "three";
+import { Plane } from "@react-three/drei";
+import { useLoader, useThree } from "@react-three/fiber";
+import useCornerStore from "../zustand/cornerStore";
+import useDimensionStore from "../zustand/dimensionStore";
+import React, { useCallback, useMemo, useRef, useState } from "react";
+import { createUseGesture, dragAction, pinchAction } from "@use-gesture/react";
+import Config from "../../config";
 
 const EWidthControl = React.memo(function EWidthControl() {
-  const width = useDimensionStore.use.width()
-  const height = useDimensionStore.use.height()
-  const depth = useDimensionStore.use.depth()
-  const elementsWidths = useDimensionStore.use.elementsWidths()
-  const baseType = useDimensionStore.use.baseType()
-  const setElementsWidths = useDimensionStore.use.setElementsWidths()
+  const width = useDimensionStore.use.width();
+  const height = useDimensionStore.use.height();
+  const depth = useDimensionStore.use.depth();
+  const elementsWidths = useDimensionStore.use.elementsWidths();
+  const baseType = useDimensionStore.use.baseType();
+  const setElementsWidths = useDimensionStore.use.setElementsWidths();
+  const viewOption = useCornerStore.use.viewOption();
+  const minLength = useDimensionStore.use.minLength();
+  const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [arrowIndex, setArrowIndex] = useState(-1);
+  const [dragging, setDragging] = useState(false);
 
-  const viewOption = useCornerStore.use.viewOption()
-
-  const minLength = useDimensionStore.use.minLength()
-
-  const [selectedIndex, setSelectedIndex] = useState(-1)
-  const [arrowIndex, setArrowIndex] = useState(-1)
-  const [dragging, setDragging] = useState(false)
-
-  const [flag, setFlag] = useState(true)
+  const [flag, setFlag] = useState(true);
 
   const elementSpaceInfo = useMemo(() => {
-    let accumulatedWidth = Config.plate.thickness / 2
+    let accumulatedWidth = Config.plate.thickness / 2;
 
     return Array.from({ length: elementsWidths.length }, (_, index) => {
-      const widthAtIndex = elementsWidths[index]
+      const widthAtIndex = elementsWidths[index];
       const pos = [
         accumulatedWidth + widthAtIndex / 2 + Config.plate.thickness / 2,
         height / 2 +
-          (baseType === Config.baseType.panel
-            ? Config.plate.plinthHeight
-            : Config.glider.height) /
+          (baseType === Config.baseType.panel ? Config.plate.plinthHeight : Config.glider.height) /
             2,
         depth + 0.1,
-      ]
+      ];
       const size = [
         widthAtIndex + Config.plate.thickness,
         height -
-          (baseType === Config.baseType.panel
-            ? Config.plate.plinthHeight
-            : Config.glider.height) -
+          (baseType === Config.baseType.panel ? Config.plate.plinthHeight : Config.glider.height) -
           Config.plate.thickness * 2,
-      ]
-      accumulatedWidth += widthAtIndex + Config.plate.thickness
-      return { pos, size }
-    })
-  }, [elementsWidths, height, depth, baseType])
+      ];
+      accumulatedWidth += widthAtIndex + Config.plate.thickness;
+      return { pos, size };
+    });
+  }, [elementsWidths, height, depth, baseType]);
 
   const arrowMap = useLoader(
     THREE.TextureLoader,
     "/images/configurator/icons/horizontal_arrow.png"
-  )
+  );
 
-  const ref = useRef()
-
-  const pointer = useRef(new THREE.Vector2())
-
-  const { size, camera, raycaster } = useThree()
+  const ref = useRef();
+  const pointer = useRef(new THREE.Vector2());
+  const { size, camera, raycaster } = useThree();
 
   const handleDragStart = useCallback((state) => {
-    state.event.stopPropagation()
-    setDragging(true)
-    // setFlag(true)
-  }, [])
+    state.event.stopPropagation();
+    setDragging(true);
+  }, []);
 
   const handleDrag = useCallback(
     (state) => {
-      state.event.stopPropagation()
-      if (state.delta[0] === 0 && state.delta[1] === 0) return
+      state.event.stopPropagation();
+      if (state.delta[0] === 0 && state.delta[1] === 0) return;
 
-      pointer.current.x = ((state.values[0] - size.left) / size.width) * 2 - 1
-      pointer.current.y = -((state.values[1] - size.top) / size.height) * 2 + 1
+      pointer.current.x = ((state.values[0] - size.left) / size.width) * 2 - 1;
+      pointer.current.y = -((state.values[1] - size.top) / size.height) * 2 + 1;
 
-      raycaster.setFromCamera(pointer.current, camera)
+      raycaster.setFromCamera(pointer.current, camera);
       if (flag) {
-        const intersects = raycaster.intersectObjects([ref.current], true)
+        const intersects = raycaster.intersectObjects([ref.current], true);
 
         if (intersects[0]) {
-          const posX = intersects[0].point.x * 100 + width / 2
-          const totalWidth =
-            elementsWidths[arrowIndex] + elementsWidths[arrowIndex + 1]
+          const posX = intersects[0].point.x * 100 + width / 2;
+          const totalWidth = elementsWidths[arrowIndex] + elementsWidths[arrowIndex + 1];
           let leftWidth =
             posX -
             (elementSpaceInfo[arrowIndex].pos[0] -
               elementSpaceInfo[arrowIndex].size[0] / 2 +
-              Config.plate.thickness / 2)
-          let rightWidth = totalWidth - leftWidth
-          // console.log(elementSpaceInfo)
-          // Ensure minimum and maximum door lengths
+              Config.plate.thickness / 2);
+          let rightWidth = totalWidth - leftWidth;
           if (posX > totalWidth - minLength) {
             // setFlag(false)
           }
-          // console.log(posX)
           if (leftWidth < minLength) {
-            leftWidth = minLength
-            rightWidth = totalWidth - leftWidth
+            leftWidth = minLength;
+            rightWidth = totalWidth - leftWidth;
           } else if (leftWidth > Config.plate.maxDoubleDoorLength) {
-            leftWidth = Config.plate.maxDoubleDoorLength
-            rightWidth = totalWidth - leftWidth
+            leftWidth = Config.plate.maxDoubleDoorLength;
+            rightWidth = totalWidth - leftWidth;
           } else if (rightWidth < minLength) {
-            rightWidth = minLength
-            leftWidth = totalWidth - rightWidth
+            rightWidth = minLength;
+            leftWidth = totalWidth - rightWidth;
           } else if (rightWidth > Config.plate.maxDoubleDoorLength) {
-            rightWidth = Config.plate.maxDoubleDoorLength
-            leftWidth = totalWidth - rightWidth
+            rightWidth = Config.plate.maxDoubleDoorLength;
+            leftWidth = totalWidth - rightWidth;
           }
 
           const newArray = elementsWidths.map((value, index) =>
-            index === arrowIndex
-              ? leftWidth
-              : index === arrowIndex + 1
-              ? rightWidth
-              : value
-          )
-          if (elementsWidths[arrowIndex+1] > 0 && totalWidth - leftWidth > 0)
-            setElementsWidths(newArray)
+            index === arrowIndex ? leftWidth : index === arrowIndex + 1 ? rightWidth : value
+          );
+          if (elementsWidths[arrowIndex + 1] > 0 && totalWidth - leftWidth > 0)
+            setElementsWidths(newArray);
         }
       }
     },
-    [
-      size,
-      camera,
-      raycaster,
-      elementsWidths,
-      arrowIndex,
-      elementSpaceInfo,
-      width,
-      flag
-    ]
-  )
+    [size, camera, raycaster, elementsWidths, arrowIndex, elementSpaceInfo, width, flag]
+  );
 
   const handleDragEnd = useCallback((state) => {
-    state.event.stopPropagation()
-    setDragging(false)
+    state.event.stopPropagation();
+    setDragging(false);
     // setFlag(true)
-  }, [])
+  }, []);
 
   const useGestureOptions = useMemo(
     () => ({
@@ -149,13 +121,13 @@ const EWidthControl = React.memo(function EWidthControl() {
       onDragEnd: handleDragEnd,
     }),
     [handleDragStart, handleDrag, handleDragEnd]
-  )
+  );
 
-  const useGesture = createUseGesture([dragAction, pinchAction])
+  const useGesture = createUseGesture([dragAction, pinchAction]);
 
   const bind = useGesture(useGestureOptions, {
     enabled: viewOption === Config.view.front,
-  })
+  });
 
   return (
     <>
@@ -180,14 +152,14 @@ const EWidthControl = React.memo(function EWidthControl() {
               rotateZ={Math.PI / 2}
               position={info.pos}
               onPointerOver={(e) => {
-                e.stopPropagation()
-                if (dragging) return
-                setSelectedIndex(index)
+                e.stopPropagation();
+                if (dragging) return;
+                setSelectedIndex(index);
               }}
               onPointerOut={(e) => {
-                e.stopPropagation()
-                if (dragging) return
-                setSelectedIndex(-1)
+                e.stopPropagation();
+                if (dragging) return;
+                setSelectedIndex(-1);
               }}
             >
               <meshStandardMaterial opacity={0} transparent />
@@ -212,8 +184,8 @@ const EWidthControl = React.memo(function EWidthControl() {
               }
               onPointerOver={() => {
                 document.body.style.cursor = "pointer";
-                if (dragging) return
-                setArrowIndex(index - 1)
+                if (dragging) return;
+                setArrowIndex(index - 1);
               }}
               onPointerOut={() => {
                 document.body.style.cursor = "auto";
@@ -226,7 +198,7 @@ const EWidthControl = React.memo(function EWidthControl() {
         </group>
       ))}
     </>
-  )
-})
+  );
+});
 
-export default EWidthControl
+export default EWidthControl;

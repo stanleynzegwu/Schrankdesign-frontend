@@ -1,11 +1,7 @@
-// import { useCallback } from "react"
-// import Config from "../../config"
-
-// import InfoIcon from "../../../assets/icons/info_icon.svg"
-import { InfoIcon } from "@src/components/icons";
+import InfoIcon from "@src/assets/icons/info_icon.svg"
 
 export default function GriffCard(props) {
-  const { imageUrl, className } = props; // type, griff_type,
+  const { imageUrl, type, griff_type, className } = props
 
   return (
     <div className="relative">
@@ -14,7 +10,7 @@ export default function GriffCard(props) {
         <img src={imageUrl} draggable={false} className="rounded-[10px] h-[95px]"/>
       </div>
       <div className="absolute right-0 top-0 cursor-target">
-        <InfoIcon />
+        <img src={InfoIcon} />
       </div>
     </div>
   )

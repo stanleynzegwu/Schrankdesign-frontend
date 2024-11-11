@@ -5,12 +5,12 @@ import { useEffect, useState } from "react";
 
 import useDimensionStore from "../zustand/dimensionStore";
 import { ConfigSetting, setActive } from "../../../api/api";
-import { Field, Form, Formik } from "formik"; // ErrorMessage,
+import { ErrorMessage, Field, Form, Formik } from "formik"
 import { toast } from "react-hot-toast";
-// import { GetallDrawer, GetallPlates } from "../../../Functions-configurator/Function-configurator"; // GetTexture,
+import { GetallDrawer, GetTexture, GetallPlates } from "../../../Functions-configurator/Function-configurator";
 import ImageTooltip from "../../../components/common/ImageTooltip";
 import { ConfigSetvalidationSchema } from "../../../Formik/FormikFunctions"
-
+// const baseUrl = 'https://storage.googleapis.com/schrankdesign-uploads/textures/';
 const baseUrl = import.meta.env.VITE_BACKEND_URL_img
 
 export default function Settings(props) {
@@ -75,10 +75,10 @@ export default function Settings(props) {
     const setExtra = useDimensionStore.use.setExtra()
     const setFeets = useDimensionStore.use.setFeets()
 
-    // const width = useDimensionStore.use.width()
-    // const height = useDimensionStore.use.height()
+    const width = useDimensionStore.use.width()
+    const height = useDimensionStore.use.height()
     const depth = useDimensionStore.use.depth()
-  const handleSubmit = async (values) => {
+  const handleSubmit = async (values, { resetForm }) => {
     if (values.minDepth > depth) {
       values.minDepth = depth
     }
@@ -86,6 +86,7 @@ export default function Settings(props) {
       values.maxDepth = depth
     }
     const { status } = await ConfigSetting(slug, values)
+    // console.log(status)
     if (status.status) {
       setShow(false)
       const {
@@ -163,8 +164,7 @@ export default function Settings(props) {
         withFeet,
         hanging,
         withOutFeet
-      } = values;
-
+      } = values
       const configSet = {
         minWidth: minWidth,
         maxWidth: maxWidth,
@@ -485,6 +485,7 @@ export default function Settings(props) {
     // const GetPlates = async () => {
     //   const { data, error } = await GetallPlates()
     //   if (data) {
+    //     // console.log(data.data)
     //     setTextureList(data.data)
     //   }
     //   if (error) {
@@ -542,7 +543,7 @@ export default function Settings(props) {
   return (
     <>
       <div className="absolute left-[1133px] top-[20px] ">
-        {auth?.role == 1 ? (
+        {(import.meta.env.MODE === 'development' || auth?.role) == 1 && (
           <Button
             className=" bg-[#ffffff] border border-black text-[#000000] normal-case text-[14px] flex items-center gap-2 rounded-[2px] pl-[10px] pr-[6px] h-[39px]"
             onClick={() => {
@@ -552,8 +553,6 @@ export default function Settings(props) {
             <img src={settingIcon}></img>
             Settings
           </Button>
-        ) : (
-          <></>
         )}
       </div>   
       {show && (
@@ -564,7 +563,7 @@ export default function Settings(props) {
           enableReinitialize
           key={"show"}
         >
-          {() => (
+          {(formik) => (
             <Form>
               <div className="fixed inset-0 flex items-center justify-center z-50" style={{zIndex: 10000000000000000}}>
               <div className="fixed inset-0 bg-black opacity-50"></div>
@@ -993,7 +992,7 @@ export default function Settings(props) {
           enableReinitialize
           key={"handle"}
         >
-          {() => (
+          {(formik) => (
             <Form>
               <div className="fixed inset-0 flex items-center justify-center z-50" style={{zIndex: 100000000000000000}}>
               <div className="fixed inset-0 bg-black opacity-50"></div>
@@ -1054,7 +1053,7 @@ export default function Settings(props) {
           enableReinitialize
           key={"feet"}
         >
-          {() => (
+          {(formik) => (
             <Form>
               <div className="fixed inset-0 flex items-center justify-center z-50" style={{zIndex: 100000000000000000}}>
               <div className="fixed inset-0 bg-black opacity-50"></div>
@@ -1118,7 +1117,7 @@ export default function Settings(props) {
           enableReinitialize
           key={"texture"}
         >
-          {() => (
+          {(formik) => (
             <Form>
               <div className="fixed inset-0 flex items-center justify-center z-50" style={{zIndex: 100000000000000000}}>
               <div className="fixed inset-0 bg-black opacity-50"></div>

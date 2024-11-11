@@ -724,12 +724,6 @@ export const getDoorHeight = (height, topAsset, bottomAsset, korpusType) => {
     korpusType === Config.korpusType.innerShap ||
     korpusType === Config.korpusType.innerShap2
   ) {
-    if (
-      topAsset === Config.furnishing.type.drawer &&
-      bottomAsset === Config.furnishing.type.drawer
-    ) {
-      temp = temp;
-    }
     if (topAsset === "none" && bottomAsset === "none") {
       temp -= 1.9;
     }

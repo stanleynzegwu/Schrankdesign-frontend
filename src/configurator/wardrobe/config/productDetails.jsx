@@ -1,4 +1,4 @@
-// import React from "react";
+import React from "react";
 import { useState } from "react";
 import {
   Accordion,
@@ -22,17 +22,17 @@ import Config from "../../config";
 
 import useColorStore from "../zustand/colorStore";
 
-const QuizImag = "/src/assets/icons/quiz.png";
+const QuizImag = "@src/assets/icons/quiz.png";
 
 function Icon({ id, open }) {
   return (
     <div className="flex flex-row gap-3">
       {id === open && (
         <>
-          <img alt="TriangleLeft" src={TriangleLeft} className="pt-1" />
+          <img src={TriangleLeft} className="pt-1" />
         </>
       )}
-      {id !== open && <img alt="TriangleDown" src={TriangleDown} className="pt-1" />}
+      {id !== open && <img src={TriangleDown} className="pt-1" />}
     </div>
   );
 }
@@ -128,6 +128,7 @@ export default function ProductDetail(props) {
   const glas_shelves = furnishingAssets.filter((asset) => {
     return asset.type === Config.furnishing.type.glassBottom
   }).length
+
   const product_properties = {
     length: width,
     depth: depth,
@@ -308,14 +309,10 @@ export default function ProductDetail(props) {
           <p className="p-2 ml-4 text-[#456779] font-semibold font-sans text-2xl text-left">
             Produktdetails
           </p>
-          <Accordion 
-            open={open === "des"} 
-            icon={<Icon id="des" open={open} />} 
-          >
-              
+          <Accordion open={open === "des"} icon={<Icon id="des" open={open} />}>
             <AccordionHeader
               onClick={() => handleOpen("des")}
-              className="bg-[#d9d9d9] text-[#456779] py-2 pl-6 pr-4 border-b-0 border-t-[1px] border-t-[#000000]" 
+              className="bg-[#d9d9d9] text-[#456779] py-2 pl-6 pr-4 border-b-0 border-t-[1px] border-t-[#000000]"
             >
               Beschreibung
             </AccordionHeader>
@@ -367,7 +364,7 @@ export default function ProductDetail(props) {
               ))}
               <div className="flex justify-center gap-6">
                 <Button className="min-w-48 bg-[#36695C] text-[#FFF] flex items-center gap-2 rounded-[2px] px-[29px] py-[11px] h-[43px]">
-                  <img src={AvaIcon} alt="AvaIcon" />
+                  <img src={AvaIcon} />
                   Sofortige Beratung
                 </Button>
                 <Button className="min-w-48 text-lg bg-[#36695C] text-[#FFF] flex items-center gap-2 rounded-[2px] px-[29px] py-[11px] h-[43px]">

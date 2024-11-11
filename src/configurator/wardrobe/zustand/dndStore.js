@@ -1,17 +1,23 @@
-import createSelectors from "./createSelectors"
-import Config from "../../config"
-import { create } from "zustand"
+import { create } from "zustand";
+import Config from "@src/configurator/config";
+import createSelectors from "./createSelectors";
 
 const useDndStoreBase = create((set) => ({
   type: Config.furnishing.type.shelf,
   drawerHeight: Config.furnishing.drawer.defaultHeight[1],
   drawerTopDistance: Config.furnishing.drawer.topShelfDistance,
-  productDragging: false,
+  
   drawerType: Config.furnishing.drawer.type.drawer8,
   door_category: Config.door.category.standard,
   door_type: Config.door.type.revolving_left,
-  assetDragging: false,
   flap_type: Config.door.type.flap_down,
+
+  assetDragging: false,
+  productDragging: false,
+
+  currentIndex: null,
+  setCurrentIndex: (currentIndex) => set({ currentIndex }),
+
   setType: (type) => set({ type }),
   setDrawerHeight: (drawerHeight) => set({ drawerHeight }),
   setDrawerTopDistance: (drawerTopDistance) => set({ drawerTopDistance }),
@@ -23,6 +29,6 @@ const useDndStoreBase = create((set) => ({
   setDrawerType: (drawerType) => set({ drawerType })
 }))
 
-const useDndStore = createSelectors(useDndStoreBase)
+const useDndStore = createSelectors(useDndStoreBase);
 
-export default useDndStore
+export default useDndStore;

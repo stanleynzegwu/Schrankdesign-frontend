@@ -1,11 +1,11 @@
-import { useRef, useEffect, useMemo, useState, Suspense } from "react";
+import React, { useRef, useEffect, useMemo, useState, Suspense } from "react";
 import * as THREE from "three";
-// import { useGLTF } from "@react-three/drei";
-import { FBXLoader } from "three-stdlib"; // GLTFLoader,
+import { useGLTF } from "@react-three/drei";
+import { GLTFLoader, FBXLoader } from "three-stdlib";
 import { useLoader, useThree, useFrame } from "@react-three/fiber";
 import Config from "../../../config";
 import {
-  // getDoorHeight,
+  getDoorHeight,
   getDoorPositionX,
   getDoorPositionY,
   getDoorWidth,
@@ -15,6 +15,7 @@ import {
 import useDimensionStore from "../../zustand/dimensionStore";
 import useCornerStore from "../../zustand/cornerStore";
 import { GriffModel } from "./griffModel";
+
 export function Griff(props) {
   let {
     scale,
@@ -64,7 +65,6 @@ export function Griff(props) {
   const [rotationY, setRotationY] = useState();
 
   if (scale[1] < minHeight && !pushOpen && type === Config.furnishing.type.door) {
-    
     visible = false;
   }
   if (
@@ -87,8 +87,8 @@ export function Griff(props) {
     return getHandleInfo(handle, handleIndex, handleListIndex);
   }, [handle, handleIndex, handleListIndex]);
 
-  let model = handleInfo?.gltf ? useLoader(FBXLoader, handleInfo.gltf) : undefined;
-  
+  let model = useLoader(FBXLoader, handleInfo.gltf ?? '/models/empty.fbx');
+
   useEffect(() => {
     if (model) {
       const box = new THREE.Box3().setFromObject(model);
@@ -131,7 +131,6 @@ export function Griff(props) {
         setEWidthsFixed(Array(Config.init.elementsCount).fill(false));
       } 
       else if (elementsCount === 0) {
-        // console.log("hereerer")
         const elements = [];
         for (let index = 0; index < Config.init.elementsCount; index++) {
           elements.push(
@@ -401,16 +400,21 @@ export function Griff(props) {
           positionY += drawerGroupScale[i] / 2 -topShelfDistance;
           tempPositionY = drawerGroupScale[i] / 2
         } else {
-          positionY +=  drawerGroupScale[i] / 2 + tempPositionY + Config.furnishing.shelf.thickness1 + topShelfDistance
+          positionY += drawerGroupScale[i] / 2 
+            + tempPositionY 
+            + Config.furnishing.shelf.thickness1 
+            + topShelfDistance
             + Config.furnishing.drawer.bottomShelfDistance
   
           tempPositionY = drawerGroupScale[i] / 2
         }
-        const scaleY = drawerGroupScale[i] + topShelfDistance - 0.475
-                        + Config.furnishing.drawer.bottomShelfDistance + Config.furnishing.shelf.thickness1
+        const scaleY = drawerGroupScale[i] 
+          + topShelfDistance - 0.475
+          + Config.furnishing.drawer.bottomShelfDistance 
+          + Config.furnishing.shelf.thickness1
   
         griffes.push(
-          <group ref={drawerRef} position={[0, positionY, depth / 2]}>
+          <group key={i} ref={drawerRef} position={[0, positionY, depth / 2]}>
             <GriffModel
                object={model}
                scale={modelScale}

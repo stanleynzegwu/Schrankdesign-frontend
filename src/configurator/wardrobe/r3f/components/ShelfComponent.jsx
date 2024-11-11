@@ -1,430 +1,389 @@
-/* eslint-disable react/no-unknown-property */
-import { Plane, RoundedBox } from "@react-three/drei";
-import React, {
-  useState,
-  useEffect,
-  useMemo,
-  useRef,
-  useCallback,
-} from "react";
-// import { Select } from "@react-three/postprocessing"
-import { useLoader, useThree } from "@react-three/fiber";
-import { createUseGesture, dragAction, pinchAction } from "@use-gesture/react";
 import * as THREE from "three";
-
-import Config from "../../../config";
-import { getDraggingInfo } from "../../utils/draggingInfo";
-import { getBottom, getTop } from "../../utils/availableSpace";
-import MeasureComponent from "./MeasureComponent";
-
-import useDndStore from "../../zustand/dndStore";
-import useDimensionStore from "../../zustand/dimensionStore";
-import useCornerStore from "../../zustand/cornerStore";
-import useFurnishingStore from "../../zustand/furnishingStore";
 import Plate from "../common/Plate";
+import { useThree } from "@react-three/fiber";
+import Config from "../../../config";
+import { RoundedBox } from "@react-three/drei";
+import MeasureComponent from "./MeasureComponent";
+import useDndStore from "../../zustand/dndStore";
+import useCalcStore from "../../zustand/calcStore";
+import useCornerStore from "../../zustand/cornerStore";
+import { getDraggingInfo } from "../../utils/draggingInfo";
+import useDimensionStore from "../../zustand/dimensionStore";
+import useFurnishingStore from "../../zustand/furnishingStore";
+import { getBottom, getTop } from "../../utils/availableSpace";
+import { createUseGesture, dragAction, pinchAction } from "@use-gesture/react";
+import { ControlButtons, PlaneComponent } from "../../../../components/controllButtons";
+import React, { useState, useMemo, useRef, useCallback, useEffect } from "react";
+import { getAvailableSpace } from "../../utils/availableSpace";
 
 let intersects = new Array(1);
 
-const findClosestElement = (array, target) => {
-  let closestElement = array[0]; // Assume the first element is closest initially
-  let minDifference = Math.abs(target - array[0]); // Initialize with the difference of the first element
-
-  for (let i = 1; i < array.length; i++) {
-    const difference = Math.abs(target - array[i]);
-
-    if (difference < minDifference) {
-      minDifference = difference;
-      closestElement = array[i];
-    }
-  }
-
-  return closestElement;
-};
-
 const ShelfComponent = React.memo(function ShelfComponent({
-  xIndex,
-  inDivider,
-  d_xIndex,
-  d_yPos,
-  type,
-  initialScale,
-  position,
+  asset,
   spaceRef,
-  isShowControl,
   allfurnishing,
+  index,
+  svId,
 }) {
+  const { xIndex, inDivider, d_xIndex, d_yPos, type, scale, position, isShowControl } = asset;
   const { size, camera, raycaster } = useThree();
-
-  const setType = useDndStore.use.setType();
-
-  const [scale, setScale] = useState(initialScale);
-
-  const [planPositionX, setPlanPositionX] = useState();
-  const [planPositionY, setPlanPositionY] = useState();
-
-  const korpusType = useDimensionStore.use.korpusType()
-
-  // update scale based on initial scale change
-  useEffect(() => {
-    setScale(initialScale);
-    // setShowControl(!isShowControl);
-    setShowControl(false)
-  }, [initialScale]);
-
-  const pointer = useMemo(() => new THREE.Vector2(), []);
-
   const ref = useRef();
-  const viewOption = useCornerStore.use.viewOption();
-  const setShowDimensions = useCornerStore.use.setShowDimensions();
+  const minDis = Config.furnishing.shelf.minDistance;
+  const pointer = useMemo(() => new THREE.Vector2(), []);
+  const moveRef = useRef({ up: true, down: true });
+  const stopRef = useRef({ top: null, bottom: null });
 
-  const height = useDimensionStore.use.height();
-  const depth = useDimensionStore.use.depth();
-  const width = useDimensionStore.use.width();
-
-  const addAsset = useFurnishingStore.use.addAsset();
-  const removeAsset = useFurnishingStore.use.removeAsset();
-  const setSelectionInfo = useFurnishingStore.use.setSelectionInfo();
-  const updateAssetsInSpace = useFurnishingStore.use.updateAssetsInSpace();
-
-  const hanging = useDimensionStore.use.hanging();
-  const withFeet = useDimensionStore.use.withFeet();
-
-  const assetDragging = useDndStore.use.assetDragging();
-  const setAssetDragging = useDndStore.use.setAssetDragging();
-
-  const totalSpace = useFurnishingStore.use.totalSpace();
-
-  const [dragStarted, setDragStarted] = useState(true);
-
-  const [showControl, setShowControl] = useState(!!isShowControl);
-
-  const [moveTriger, setMoveTriger] = useState(true);
-
-  const [moveFlag, setMoveFlag] = useState();
-
-  // show or hide measurement
-  // show measure while dragging assets
-  const [showMeasure, setShowMeasure] = useState(false);
-  const [measureInfo, setMeasureInfo] = useState({
-    posX: 0,
-    aboveTop: 0,
-    aboveBottom: 0,
-    belowTop: 0,
-    belowBottom: 0,
+  const dragStateRef = useRef({
+    initial: [0, 0],
+    values: [0, 0],
+    previousY: 0,
+    goingUp: null,
+    previousGoingUp: null,
   });
+  const { shelf, foldBottom, glassBottom } = Config.furnishing.type;
 
-  useEffect(() => {
-    if (!dragStarted) {
-      setShowDimensions(false);
-      setPlanPositionX(position[0]);
-      setPlanPositionY(position[1]);
-      setSelectionInfo({
-        xIndex,
-        yPos: position[1],
-        inDivider,
-        d_xIndex,
-        d_yPos,
+  const { setType, assetDragging, setAssetDragging, setCurrentIndex } = useDndStore((state) => ({
+    setType: state.setType,
+    assetDragging: state.assetDragging,
+    setAssetDragging: state.setAssetDragging,
+    setCurrentIndex: state.setCurrentIndex,
+  }));
+
+  const { korpusType, height, depth, hanging, withFeet, width, baseType } = useDimensionStore(
+    (state) => ({
+      korpusType: state.korpusType,
+      height: state.height,
+      depth: state.depth,
+      hanging: state.hanging,
+      withFeet: state.withFeet,
+      width: state.width,
+      baseType: state.baseType,
+    })
+  );
+
+  const { addAsset, setSelectionInfo, updateAsset, removeAssetByIndex } = useFurnishingStore(
+    (state) => ({
+      addAsset: state.addAsset,
+      setSelectionInfo: state.setSelectionInfo,
+      updateAsset: state.updateAsset,
+      removeAssetByIndex: state.removeAssetByIndex,
+    })
+  );
+
+  const { viewOption, setShowDimensions } = useCornerStore((state) => ({
+    viewOption: state.viewOption,
+    setShowDimensions: state.setShowDimensions,
+  }));
+
+  const { showMeasure, measureInfo, setShowMeasure, setMeasureInfo } = useCalcStore((state) => ({
+    showMeasure: state.showMeasure,
+    measureInfo: state.measureInfo,
+    setShowMeasure: state.setShowMeasure,
+    setMeasureInfo: state.setMeasureInfo,
+  }));
+
+  const elementsWidths = useDimensionStore.use.elementsWidths();
+  const currentIndex = useDndStore.use.currentIndex();
+  const drawerHeight = useDndStore.use.drawerHeight();
+  const drawerTopDistance = useDndStore.use.drawerTopDistance();
+  const doorAssets = useFurnishingStore.use.doorAssets();
+  const furnishingAssets = useFurnishingStore.use.furnishingAssets();
+  const selectionInfo = useFurnishingStore.use.selectionInfo();
+  const korpusMaterial = useDimensionStore.use.korpusMaterial();
+  const withOutFeet = useDimensionStore.use.withOutFeet();
+
+  const [showControl, setShowControl] = useState(false);
+  const positionsRef = useRef({});
+  const addY = hanging || withFeet ? 25 : 0;
+  const memoArray = [
+    spaceRef,
+    dragStateRef,
+    ref,
+    moveRef,
+    allfurnishing,
+    scale,
+    measureInfo,
+    hanging,
+    withFeet,
+    intersects,
+    positionsRef,
+  ];
+
+  const handleDragStart = useCallback(() => {
+    setType(type);
+    setCurrentIndex(index);
+    setShowDimensions(false);
+    setSelectionInfo({
+      xIndex,
+      yPos: position[1],
+      inDivider,
+      d_xIndex,
+      d_yPos,
+    });
+    setAssetDragging(true);
+    setShowControl(false);
+  }, [type]);
+
+  const selectChildren = ({ currentY, currentSection, currentIndex, goingUp }) => {
+    const all = [];
+    const filtered = allfurnishing.current.children
+      .filter((c, i) => {
+        if (!c.children.length) return;
+        const isInSameSection = c.userData.xIndex === currentSection;
+        const isNotCurrent = i !== currentIndex;
+        const y = c.children[1].position.y;
+        const positionComparison = goingUp ? y > currentY : y < currentY;
+
+        return isInSameSection && isNotCurrent && positionComparison;
+      })
+      .sort((a, b) => {
+        const aY = a.children[1].position.y;
+        const bY = b.children[1].position.y;
+        return goingUp ? aY - bY : bY - aY;
       });
-      setAssetDragging(true);
-      setShowControl(false);
-    }
-  }, [dragStarted]);
 
-  const getMinDistance = (array, movePosY, targetPosY, unitDis) => {
-    const filteredArray = array.filter(
-      (e) =>
-        (e.userData?.position &&
-          e.children[1]?.position.y > movePosY &&
-          e.children[1]?.position.y < targetPosY) ||
-        (e.children[1]?.position.y < movePosY &&
-          e.children[1]?.position.y > targetPosY)
-    );
-    const count = filteredArray.length;
-    const minDis = unitDis * (count + 1);
-    return minDis;
+    for (let i = 0; i < filtered.length; i++) {
+      const type = filtered[i].furnishType;
+      if (type === "shelf") all.push(filtered[i]);
+      else break;
+    }
+
+    return all;
   };
 
-  const pushAssetsInSpace = (payload) => {
-    const { topYPos, bottomYPos, movePosY, currentIndex, flagPosition } =
-      payload;
+  const setDirection = (state) => {
+    const initialY = state.initial[1];
+    const currentY = state.values[1];
 
-    const filterCondition = (item) =>
-      !inDivider
-        ? !item.inDivider &&
-          item.xIndex === xIndex &&
-          item.position[1] >= bottomYPos &&
-          item.position[1] <= topYPos
-        : item.inDivider &&
-          item.d_xIndex === d_xIndex &&
-          item.d_yPos === d_yPos &&
-          item.xIndex === xIndex &&
-          item.position[1] >= bottomYPos &&
-          item.position[1] <= topYPos;
+    if (dragStateRef.current.previousY === null) dragStateRef.current.previousY = initialY;
 
-    allfurnishing.current.children.map((e, index) => {
-      if (
-        e.userData &&
-        filterCondition &&
-        index !== currentIndex &&
-        flagPosition === e.children[1]?.position.x
-      ) {
-        const minDis = getMinDistance(
-          allfurnishing.current.children,
-          movePosY,
-          e.children[1]?.position.y,
-          19
-        );
-        if (Math.abs(e.children[1]?.position.y - movePosY) < minDis) {
-          if (e.children[1]?.position.y > movePosY) {
-            e.children[1]?.position.set(
-              e.children[1].position.x,
-              movePosY + minDis,
-              e.children[1].position.z
-            );
+    dragStateRef.current.goingUp = currentY < dragStateRef.current.previousY;
+    dragStateRef.current.previousGoingUp = dragStateRef.current.goingUp;
+    dragStateRef.current.previousY = currentY;
+    dragStateRef.current.values = state.values;
+  };
 
-            if (index === currentIndex - 1 || index === currentIndex + 1) {
-              setMoveFlag(movePosY + minDis);
-            }
-          } else {
-            e.children[1].position.set(
-              e.children[1].position.x,
-              movePosY - minDis,
-              e.children[1].position.z
-            );
-            if (index === currentIndex - 1 || index === currentIndex + 1) {
-              setMoveFlag(movePosY - minDis);
-            }
-          }
-        }
+  const updateRuler = (availableTop, availableBottom, result) => {
+    const tempMeasureInfo = {
+      posX: intersects[0].object.position.x,
+      aboveTop: availableTop,
+      aboveBottom: getBottom(result.posY - addY, scale[1], type, 0),
+      belowTop: getTop(result.posY - addY, scale[1], type),
+      belowBottom: availableBottom,
+    };
+    if (JSON.stringify(measureInfo) !== JSON.stringify(tempMeasureInfo))
+      setMeasureInfo(tempMeasureInfo);
+  };
+
+  const updatePositionChild = ({ svId, position }) => {
+    const { x, y, z } = position;
+    const thisChildObj = allfurnishing.current.children.find((e) => e.userData.svId === svId);
+    thisChildObj.children[1].position.set(x, y, z);
+    positionsRef.current = {
+      ...positionsRef.current,
+      [svId]: { x, y, z },
+    };
+  };
+
+  const updatePositionDragged = ({ position }) => {
+    ref.current.position.set(position.x, position.y, position.z);
+    const { top, bottom, topAsset, bottomAsset, availableTop, availableBottom, type } =
+      intersects[0].object.userData;
+
+    const result = getDraggingInfo({
+      type,
+      top,
+      bottom,
+      topAsset,
+      bottomAsset,
+      initialPosY: intersects[0].point.y * 100 + height / 2,
+      raster: Config.furnishing.default.raster,
+      availableWidth: intersects[0].object.geometry.parameters.width,
+      objectHeight: scale[1],
+    });
+
+    updateRuler(availableTop, availableBottom, result);
+  };
+
+  const checkPosition = ({ currentIndex, position }) => {
+    const { x, y, z } = position;
+    const { goingUp } = dragStateRef.current;
+    let { top, bottom, xIndex } = intersects[0].object.userData;
+
+    // top = top - addY;
+    bottom = bottom - addY;
+
+    if (intersects[0].object.name !== "available" && !intersects[0].object.userData.type) {
+      const position = {
+        x: intersects[0].point.x * 100 + width / 2,
+        y: y,
+        z: depth + depth / 2,
+      };
+      return updatePositionDragged({ position });
+    } else if (intersects[0].object.name !== "available" && intersects[0].object.userData.type) {
+      return;
+    }
+
+    const children = selectChildren({
+      currentY: ref.current.position.y,
+      currentSection: xIndex,
+      currentIndex,
+      goingUp,
+      checkShelf: true,
+    }); // depend on cursor,
+    const stoppingDistance = children.length * (scale[1] + minDis);
+    const stoppingPointDragged = goingUp
+      ? top - stoppingDistance - addY
+      : bottom + stoppingDistance;
+
+    if (goingUp) stopRef.current.top = stoppingPointDragged;
+    if (!goingUp) stopRef.current.bottom = stoppingPointDragged;
+
+    const stop = goingUp ? y >= stopRef.current.top : y <= stopRef.current.bottom;
+
+    if (stop) return;
+    if (goingUp && stopRef.current.bottom && y <= stopRef.current.bottom) return;
+    if (!goingUp && stopRef.current.top && y >= stopRef.current.top) return;
+
+    if (y + 5 >= top - addY) {
+      // end top
+      return updatePositionDragged({ position: { x, y: top + scale[1] / 2 - addY, z } });
+    } else if (y - 5 <= bottom) {
+      // end bottom
+      return updatePositionDragged({ position: { x, y: bottom + scale[1] / 2, z } });
+    }
+
+    updatePositionDragged({ position: { x, y, z } });
+
+    if (!children) return updatePositionDragged({ position: { x, y, z } });
+
+    children.forEach((child, index) => {
+      const { svId } = child.userData;
+      const thisChildY = child.children[1].position.y;
+      const adjustment = (minDis + scale[1]) * (index + 1);
+      const distance = goingUp ? thisChildY - y : y - thisChildY;
+      const stoppingPoint = goingUp
+        ? top -
+          (children.length - index - 1) *
+            (scale[1] + (index === children.length - 1 ? 0 : minDis)) -
+          addY
+        : bottom +
+          (children.length - index - 1) * (scale[1] + (index === children.length - 1 ? 0 : minDis));
+
+      if (distance > adjustment) return;
+
+      const [X, , Z] = child.userData.position;
+
+      const newY = goingUp ? y + adjustment : y - adjustment;
+      if (goingUp && thisChildY < stoppingPoint) {
+        updatePositionChild({ svId, position: { x: X, y: newY, z: Z } });
+      } else if (!goingUp && thisChildY > stoppingPoint) {
+        updatePositionChild({ svId, position: { x: X, y: newY, z: Z } });
+      } else if (goingUp && thisChildY >= stoppingPoint) {
+        updatePositionChild({ svId, position: { x: X, y: stoppingPoint, z: Z } });
+      } else if (!goingUp && thisChildY <= stoppingPoint) {
+        updatePositionChild({ svId, position: { x: X, y: stoppingPoint, z: Z } });
       }
     });
   };
 
-  const handleDragStart = useCallback(() => {
-    setType(type);
-    setDragStarted(true);
-  }, [type]);
+  // Ensures showControl is false for assets other than the currently interacted asset
+  useEffect(() => {
+    if (assetDragging) {
+      furnishingAssets.forEach((_, index) => {
+        if (currentIndex !== index) setShowControl(false);
+      });
+    }
+  }, [currentIndex]);
 
-  const handleDrag = useCallback(
-    (state) => {
-      if (moveTriger) {
-        if (state.elapsedTime < 100) return;
+  const handleDrag = useCallback((state) => {
+    if (state.delta[0] === 0 && state.delta[1] === 0) return;
+    document.body.style.cursor = "grabbing";
 
-        if (state.delta[0] === 0 && state.delta[1] === 0) return;
+    setDirection(state);
+    setShowMeasure(true);
 
-        setDragStarted(false);
+    pointer.x = ((state.values[0] - size.left) / size.width) * 2 - 1;
+    pointer.y = -((state.values[1] - size.top) / size.height) * 2 + 1;
+    raycaster.setFromCamera(pointer, camera);
+    intersects = raycaster.intersectObjects(spaceRef.children, true);
 
-        pointer.x = ((state.values[0] - size.left) / size.width) * 2 - 1;
-        pointer.y = -((state.values[1] - size.top) / size.height) * 2 + 1;
+    if (!intersects[0]) return;
 
-        raycaster.setFromCamera(pointer, camera);
+    const currentIndex = allfurnishing.current.children.findIndex((e) => e.userData.svId === svId);
+    const cursor = intersects[0].point.y * 100 + height / 2 - addY;
 
-        intersects = raycaster.intersectObjects(spaceRef.children, true);
+    checkPosition({
+      currentIndex,
+      position: { x: intersects[0].object.position.x, y: cursor, z: position[2] },
+    });
 
-        if (intersects[0] !== undefined) {
-          if (intersects[0].object.name === "available") {
-            const {
-              top,
-              bottom,
-              topAsset,
-              bottomAsset,
-              availableTop,
-              availableBottom,
-            } = intersects[0].object.userData;
+    if (
+      scale[0] !== intersects[0].object.geometry.parameters.width &&
+      intersects[0].object.name !== "other"
+    ) {
+      updateAsset({
+        index,
+        newData: { scale: [intersects[0].object.geometry.parameters.width, scale[1], scale[2]] },
+      });
+    }
+  }, memoArray);
 
-            const result = getDraggingInfo({
-              type,
-              top,
-              bottom,
-              topAsset,
-              bottomAsset,
-              initialPosY: intersects[0].point.y * 100 + height / 2,
-              raster: Config.furnishing.default.raster,
-              availableWidth: intersects[0].object.geometry.parameters.width,
-              objectHeight: scale[1],
-            });
-            ref.current?.position.set(
-              intersects[0].object.position.x,
-              hanging || withFeet ? result.posY-25 : result.posY,
-              position[2]
-            );
+  const handleDragEnd = useCallback((state) => {
+    if (state.values[0] === state.initial[0] && state.values[1] === state.initial[1]) return;
 
-            if (
-              scale[0] !== result.objectWidth ||
-              scale[1] !== initialScale[1] ||
-              scale[2] !== initialScale[2]
-            ) {
-              setScale([result.objectWidth, initialScale[1], initialScale[2]]);
-            }
+    Object.entries(positionsRef.current).forEach(([svId, position]) => {
+      const refItem = allfurnishing.current.children.find((s) => s.userData.svId === svId);
 
-            setShowMeasure(true);
-            const tempMeasureInfo = {
-              posX: intersects[0].object.position.x,
-              aboveTop: availableTop,
-              aboveBottom: getBottom(
-                hanging || withFeet ? result.posY-25 : result.posY, 
-                scale[1], type, 0
-              ),
-              belowTop: getTop(
-                hanging || withFeet ? result.posY-25 : result.posY, 
-                scale[1], type
-              ),
-              belowBottom: availableBottom,
-            };
+      updateAsset({
+        index: refItem.furnishIndex,
+        newData: {
+          position: [position.x, position.y, position.z],
+        },
+      });
+    });
 
-            if (
-              JSON.stringify(measureInfo) !== JSON.stringify(tempMeasureInfo)
-            ) {
-              setMeasureInfo(tempMeasureInfo);
-            }
-
-            if (
-              allfurnishing.current &&
-              allfurnishing.current.children.length > 1
-            ) {
-              const currentIndex = allfurnishing.current.children.findIndex(
-                (e) =>
-                  e.userData &&
-                  e.userData.position &&
-                  e.userData.position[1] === position[1]
-              );
-
-              const { nearestTop, nearestBottom } = getSpaceLimit();
-              const movePosY = ref.current?.position.y;
-              const flagPosition = ref.current?.position.x;
-              const topMinDis = getMinDistance(
-                allfurnishing.current.children,
-                movePosY,
-                nearestTop,
-                19
-              );
-              const bottomMinDis = getMinDistance(
-                allfurnishing.current.children,
-                movePosY,
-                nearestBottom,
-                19
-              );
-              if (
-                nearestTop - movePosY >= topMinDis - 19 &&
-                movePosY - nearestBottom >= bottomMinDis - 19
-              ) {
-                pushAssetsInSpace({
-                  topYPos: nearestTop,
-                  bottomYPos: nearestBottom,
-                  movePosY,
-                  currentIndex,
-                  flagPosition: flagPosition,
-                });
-                setMoveTriger(true);
-              } else {
-                setMoveTriger(false);
-              }
-            }
-          } else {
-            ref.current?.position.set(
-              intersects[0].point.x * 100 + width / 2,
-              intersects[0].point.y * 100 + height / 2,
-              depth + depth / 2
-            );
-
-            setShowMeasure(false);
-          }
-        }
-      } else {
-        pointer.x = ((state.values[0] - size.left) / size.width) * 2 - 1;
-        pointer.y = -((state.values[1] - size.top) / size.height) * 2 + 1;
-        raycaster.setFromCamera(pointer, camera);
-
-        intersects = raycaster.intersectObjects(spaceRef.children, true);
-        if (intersects[0] !== undefined) {
-          if (intersects[0].object.name === "available") {
-            const {
-              top,
-              bottom,
-              topAsset,
-              bottomAsset,
-              // availableTop,
-              // availableBottom,
-            } = intersects[0].object.userData;
-
-            const result = getDraggingInfo({
-              type,
-              top,
-              bottom,
-              topAsset,
-              bottomAsset,
-              initialPosY: intersects[0].point.y * 100 + height / 2,
-              raster: Config.furnishing.default.raster,
-              availableWidth: intersects[0].object.geometry.parameters.width,
-              objectHeight: scale[1],
-            });
-
-            if (
-              (ref.current.position.y >= result.posY &&
-                ref.current.position.y < moveFlag) ||
-              (ref.current.position.y <= result.posY &&
-                ref.current.position.y > moveFlag)
-            ) {
-              setMoveTriger(true);
-            }
-          }
-        }
-      }
-    },
-    [ref, spaceRef, measureInfo, allfurnishing, moveTriger, hanging, withFeet]
-    // [ref, scale, initialScale, spaceRef, dragStarted, showMeasure]
-  );
-
-  const handleDragEnd = useCallback(
-    (state) => {
-      setPlanPositionX(ref.current.position.x);
-      setPlanPositionY(ref.current.position.y);
-      setShowControl(false);
-      if (
-        state.values[0] === state.initial[0] &&
-        state.values[1] === state.initial[1]
-      ) {
-        return;
-      }
-
-      setMoveTriger(true);
-      setShowMeasure(false);
-      if (intersects[0].object.name === "available") {
-        const payload = {};
-
-        payload.removal = {
-          xIndex,
-          yPos: position[1],
-          inDivider,
-          d_xIndex,
-          d_yPos,
-        };
-
-        payload.asset = {
-          xIndex: intersects[0].object.userData.xIndex,
-          inDivider: intersects[0].object.userData.inDivider,
-          d_xIndex: intersects[0].object.userData.d_xIndex,
-          d_yPos: intersects[0].object.userData.d_yPos,
-          position: [
-            ref.current.position.x,
-            ref.current.position.y,
-            ref.current.position.z,
-          ],
-          scale: scale,
-          type,
-          isShowControl: true,
-        };
-
-        addAsset(payload);
-        setShowControl(true);
-      } else {
-        removeAsset({ xIndex, yPos: position[1] });
-      }
-
+    // If the asset intersects with the "other" object (indicating it's outside the wardrobe),
+    // Then, update the asset's position to its previous position with a very tiny , negligible offset
+    // to the Y-axis to trigger action and move it back.
+    if (intersects[0]?.object.name === "other") {
       setAssetDragging(false);
-    },
-    [ref, scale, xIndex, position]
-  );
+      positionsRef.current = {};
+      setCurrentIndex(null);
+
+      return updateAsset({
+        index,
+        newData: {
+          position: [position[0], position[1] + 0.0000000000001, position[2]],
+          // Update the asset's scale along the x-axis based on the width of the wardrobe section (xIndex).
+          // elementsWidths is an array that stores the width of each wardrobe section(xIndex).
+          scale: [elementsWidths[xIndex], scale[1], scale[2]],
+        },
+      });
+    }
+
+    const payload = {
+      index,
+      newData: {
+        xIndex: intersects[0].object.userData.xIndex,
+        inDivider: intersects[0].object.userData.inDivider,
+        d_xIndex: intersects[0].object.userData.d_xIndex,
+        d_yPos: intersects[0].object.userData.d_yPos,
+        position: [ref.current.position.x, ref.current.position.y, ref.current.position.z],
+        scale: scale,
+        type,
+        isShowControl: true,
+      },
+    };
+
+    document.body.style.cursor = "pointer";
+    setShowMeasure(false);
+    updateAsset(payload);
+    //setShowControl(true);
+    setAssetDragging(false);
+    positionsRef.current = {};
+    setCurrentIndex(null);
+  }, memoArray);
 
   const useGesture = createUseGesture([dragAction, pinchAction]);
 
@@ -434,269 +393,208 @@ const ShelfComponent = React.memo(function ShelfComponent({
       onDrag: handleDrag,
       onDragEnd: handleDragEnd,
     },
-    { enabled: viewOption === Config.view.front }
+
+    {
+      enabled: viewOption === Config.view.front,
+      drag: { threshold: 5 },
+    }
   );
 
   const handlePointerOver = useCallback(() => {
     document.body.style.cursor = "pointer";
-    setPlanPositionX(ref.current.position.x);
-    setPlanPositionY(ref.current.position.y);
   }, []);
 
   const handlePointerOut = useCallback(() => {
     document.body.style.cursor = "auto";
   }, []);
 
-  const getSpaceLimit = useCallback(() => {
-    const topSpaces = totalSpace.filter((e) =>
-      !e.inDivider
-        ? e.d_xIndex === d_xIndex &&
-          e.xIndex === xIndex &&
-          e.top + scale[1] >= position[1]
-        : e.d_xIndex === d_xIndex &&
-          e.d_yPos === d_yPos &&
-          e.xIndex === xIndex &&
-          e.top + scale[1] >= position[1]
-    );
-    const bottomSpaces = totalSpace.filter((e) =>
-      !e.inDivider
-        ? e.d_xIndex === d_xIndex &&
-          e.xIndex === xIndex &&
-          e.bottom <= position[1]
-        : e.d_xIndex === d_xIndex &&
-          e.d_yPos === d_yPos &&
-          e.xIndex === xIndex &&
-          e.bottom <= position[1]
-    );
+  const onRemoveObject = useCallback((furnishIndex) => {
+    removeAssetByIndex(furnishIndex);
+    setShowControl(false);
+  }, []);
 
-    const otherTopSpaces = topSpaces.filter((e) => e.topAsset !== type);
-    const otherBottomSpaces = bottomSpaces.filter(
-      (e) => e.bottomAsset !== type
-    );
+  /* 1. Filters all children in `allfurnishing.current.children` to locate elements that:
+   *    - Are in the same `xIndex` (wardrobe section) as specified by `index parameter`.
+   *    - Have their `y` position (vertical position) overlapping the area defined by `top` and `bottom`,
+   *      adjusted by the element's height (`scale[1]`).
+   * 2. Loops over the filtered children to collect only those elements of type "shelf".
+   *    - Stops collecting if an element of a different type is encountered (ensures only continuous shelves are selected).
+   */
+  const selectChildrenInSpace = ({ top, bottom, index }) => {
+    const all = [];
 
-    const topValues = [];
-    const botValues = [];
-    otherTopSpaces.forEach((e) => {
-      topValues.push(e.top);
+    // Filter for elements within the given section and vertical range
+    const filtered = allfurnishing.current.children.filter((c, i) => {
+      // checks if it's in same xIndex to the one compared to
+      const isInSameSection = c.userData.xIndex === index;
+      const y = c.children[1].position.y;
+      // Checks if the 'y' vertical position is within the specified top and bottom bounds.
+      const positionComparison = y - scale[1] < top && y + scale[1] > bottom;
+      return isInSameSection && positionComparison;
     });
 
-    otherBottomSpaces.forEach((e) => {
-      botValues.push(e.bottom);
-    });
+    // Collect only continuous "shelf" elements
+    for (let i = 0; i < filtered.length; i++) {
+      const type = filtered[i].furnishType;
+      if (type === "shelf") all.push(filtered[i]);
+      else break; // Stop if a non-shelf element is encountered
+    }
 
-    const nearestTop = findClosestElement(topValues, position[1]);
-
-    const nearestBottom = findClosestElement(botValues, position[1]);
-
-    return { topValues, botValues, nearestTop, nearestBottom };
-  }, [totalSpace, xIndex, d_xIndex, scale]);
-
-  const onRemoveObject = useCallback(() => {
-    removeAsset({ xIndex, yPos: position[1] });
-  }, [xIndex, position, inDivider]);
-
-  const getSpaceLimitForAdd = useCallback(() => {
-    const topSpaces = totalSpace.filter((e) =>
-      !e.inDivider
-        ? e.d_xIndex === d_xIndex &&
-          e.xIndex === xIndex &&
-          e.availableTop + scale[1] >= position[1]
-        : e.d_xIndex === d_xIndex &&
-          e.d_yPos === d_yPos &&
-          e.xIndex === xIndex &&
-          e.availableTop + scale[1] >= position[1]
-    );
-    const bottomSpaces = totalSpace.filter((e) =>
-      !e.inDivider
-        ? e.d_xIndex === d_xIndex &&
-          e.xIndex === xIndex &&
-          e.availableBottom <= position[1]
-        : e.d_xIndex === d_xIndex &&
-          e.d_yPos === d_yPos &&
-          e.xIndex === xIndex &&
-          e.availableBottom <= position[1]
-    );
-
-    const otherTopSpaces = topSpaces.filter((e) => e.topAsset !== type);
-    const otherBottomSpaces = bottomSpaces.filter(
-      (e) => e.bottomAsset !== type
-    );
-
-    const topValues = [];
-    const botValues = [];
-    otherTopSpaces.forEach((e) => {
-      topValues.push(e.availableTop);
-    });
-
-    otherBottomSpaces.forEach((e) => {
-      botValues.push(e.availableBottom);
-    });
-
-    const nearestTop = findClosestElement(topValues, position[1]);
-
-    const nearestBottom = findClosestElement(botValues, position[1]);
-
-    return { topValues, botValues, nearestTop, nearestBottom };
-  }, [totalSpace, xIndex, d_xIndex, scale]);
+    return all;
+  };
 
   const onPlusMap = useCallback(() => {
-    const { topValues, botValues, nearestTop, nearestBottom } =
-      getSpaceLimitForAdd();
-    if (topValues.length !== 0 && botValues.length !== 0) {
-      const newYpos = updateAssetsInSpace({
-        topYPos: nearestTop,
-        bottomYPos: nearestBottom,
-        xIndex,
-        inDivider,
-        d_xIndex,
-        d_yPos,
+    const { xIndex, position } = ref.current.userData;
+
+    const space = getAvailableSpace({
+      elementsWidths,
+      baseType,
+      height,
+      depth,
+      type,
+      drawerHeight,
+      drawerTopDistance,
+      furnishingAssets,
+      doorAssets,
+      assetDragging: true,
+      selectionInfo,
+      korpusMaterial,
+      hanging,
+      withFeet,
+      withOutFeet,
+      currentIndex,
+    });
+
+    const filtered = space.filter(
+      (s) =>
+        s.xIndex == xIndex && position[1] - scale[1] <= s.top && position[1] + scale[1] >= s.bottom
+    );
+
+    // get all shelves inside the selected space
+    const children = selectChildrenInSpace({
+      top: filtered[0].top,
+      bottom: filtered[0].bottom,
+      index: xIndex,
+    });
+
+    // lets first divide the available space by the children.length + 1
+    const interval =
+      (filtered[0].top + minDis - (filtered[0].bottom - minDis)) / (children.length + 2); // we are not including the height (scale[1])
+
+    if (interval <= minDis) return;
+
+    // position all shelves as per interval and add new shelf at last
+    children.forEach((child, i) => {
+      const [x, , z] = child.children[1].position;
+      const newY = filtered[0].bottom - minDis + (i + 1) * interval;
+      const thisIndex = allfurnishing.current.children.findIndex(
+        (e) => e.userData.svId === child.userData.svId
+      );
+
+      updateAsset({
+        index: thisIndex,
+        newData: {
+          position: [x, newY, z],
+        },
       });
+    });
 
-      const payload = {};
-
-      payload.asset = {
-        xIndex,
-        yPos: position[1],
-        inDivider,
-        d_xIndex,
-        d_yPos,
-        position: [ref.current.position.x, newYpos, ref.current.position.z],
+    // add last child at last position
+    addAsset({
+      asset: {
+        xIndex: children[0].userData.xIndex,
+        inDivider: children[0].userData.inDivider,
+        d_xIndex: children[0].userData.d_xIndex,
+        d_yPos: children[0].userData.d_yPos,
+        position: [
+          children[0].userData.position[0],
+          filtered[0].bottom - minDis + (children.length + 1) * interval,
+          children[0].userData.position[2],
+        ],
         scale: scale,
         type,
-        isShowControl: false,
-      };
-      addAsset(payload);
-      setShowControl(false);
-    }
-  }, [totalSpace, xIndex, inDivider, d_xIndex, d_yPos, scale, ref]);
+        isShowControl: true,
+      },
+    });
 
-  const [trashMap, arrowUpDownMap, plusMap] = useLoader(THREE.TextureLoader, [
-    "/images/furnishing/doors/trash_blue.png",
-    "/images/configurator/icons/arrow_up_down.png",
-    "/images/configurator/icons/plus.png",
-  ]);
+    setShowControl(false);
+  }, memoArray);
 
   return (
     <group
+      furnishType="shelf"
+      furnishIndex={index}
       userData={{
         xIndex,
         inDivider,
         d_xIndex,
         d_yPos,
         type,
-        initialScale,
+        scale,
         position,
         isShowControl,
+        svId,
       }}
-
-      // ref={ref}
     >
-      <Plane
-        onPointerOver={(e) => {
-          e.stopPropagation();
-          
-          if (assetDragging) return;
-
-          setShowControl(true);
-        }}
-        onPointerOut={(e) => {
-          e.stopPropagation();
-
-          if (assetDragging) return;
-
-          setShowControl(false);
-        }}
-        args={[scale[0], 16]}
-        position={[
-          planPositionX === undefined ? position[0] : planPositionX,
-          planPositionY === undefined ? position[1] + 2 : planPositionY + 2,
-          type === Config.furnishing.type.foldBottom && korpusType === Config.korpusType.innerShap2
-          ? depth + 2.1 : depth + 0.2,
-        ]}
-        rotateX={Math.PI / 2}
-        visible={false}
+      <PlaneComponent
+        assetDragging={assetDragging}
+        setShowControl={setShowControl}
+        scale={scale}
+        planPositionX={position[0]}
+        planPositionY={position[1]}
+        position={position}
+        type={type}
+        korpusType={korpusType}
+        depth={depth}
       />
       <group
         {...bind()}
         ref={ref}
-        // eslint-disable-next-line react/no-unknown-property
         position={position}
         onPointerOver={handlePointerOver}
         onPointerOut={handlePointerOut}
+        userData={{
+          xIndex,
+          inDivider,
+          d_xIndex,
+          d_yPos,
+          type,
+          scale,
+          position,
+          isShowControl,
+          svId,
+        }}
       >
-        {(type === Config.furnishing.type.shelf ||
-          type === Config.furnishing.type.foldBottom) && (
-          <Plate args={scale} type={Config.plate.type.floor} korpShelf={type} 
+        {(type === shelf || type === foldBottom) && (
+          <Plate
+            args={scale}
+            type={Config.plate.type.floor}
+            korpShelf={type}
             category={Config.color.category.body}
           />
         )}
-        {type === Config.furnishing.type.glassBottom && (
-          <RoundedBox
-            castShadow
-            args={scale}
-            material={Config.furnishing.glassBottom.material}
-          />
+        {type === glassBottom && (
+          <RoundedBox castShadow args={scale} material={Config.furnishing.glassBottom.material} />
         )}
-        <group visible={!assetDragging && showControl && isShowControl}>
-          <mesh
-            onPointerOver={() => {
-              document.body.style.cursor = "pointer";
-            }}
-            onPointerOut={() => {
-              document.body.style.cursor = "auto";
-            }}
-            position={[0, 0,
-              type === Config.furnishing.type.foldBottom && korpusType === Config.korpusType.innerShap2
-              ? depth + 2.11 - position[2]: depth + 0.21 - position[2]]}
-          >
-            <circleGeometry args={[6]} />
-            <meshBasicMaterial map={arrowUpDownMap} />
-          </mesh>
-          <mesh
-            onPointerOver={() => {
-              document.body.style.cursor = "pointer";
-            }}
-            onPointerOut={() => {
-              document.body.style.cursor = "auto";
-            }}
-            onClick={() => onRemoveObject()}
-            position={[-scale[0] / 2 + 6, 6, 
-              type === Config.furnishing.type.foldBottom && korpusType === Config.korpusType.innerShap2
-              ? depth + 2.11 - position[2]: depth + 0.21 - position[2]]}
-          >
-            <circleGeometry args={[5]} />
-            <meshBasicMaterial map={trashMap} />
-          </mesh>
-          <mesh
-            onPointerOver={() => {
-              document.body.style.cursor = "pointer";
-              setSelectionInfo({
-                xIndex,
-                yPos: position[1],
-                inDivider,
-                d_xIndex,
-                d_yPos,
-              });
-              setType(type);
-            }}
-            onPointerOut={() => {
-              document.body.style.cursor = "auto";
-            }}
-            onClick={() => onPlusMap()}
-            position={[scale[0] / 2 - 6, 6,
-              type === Config.furnishing.type.foldBottom && korpusType === Config.korpusType.innerShap2
-              ? depth + 2.11 - position[2]: depth + 0.21 - position[2]]}
-          >
-            <circleGeometry args={[5]} />
-            <meshBasicMaterial map={plusMap} />
-          </mesh>
-        </group>
+        <ControlButtons
+          furnishIndex={index}
+          showControl={showControl}
+          onRemoveObject={onRemoveObject}
+          onPlusMap={onPlusMap}
+          setSelectionInfo={setSelectionInfo}
+          setType={setType}
+          xIndex={xIndex}
+          position={position}
+          inDivider={inDivider}
+          d_xIndex={d_xIndex}
+          d_yPos={d_yPos}
+          depth={depth}
+          scale={scale}
+          type={type}
+          korpusType={korpusType}
+        />
       </group>
-      <MeasureComponent
-        measureInfo={measureInfo}
-        showMeasure={showMeasure}
-        depth={depth}
-      />
+      <MeasureComponent measureInfo={measureInfo} showMeasure={showMeasure} depth={depth} />
     </group>
   );
 });

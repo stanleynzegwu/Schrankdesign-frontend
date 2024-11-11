@@ -52,6 +52,8 @@ const FlapComponent = React.memo(function FlapComponent({
     initialElementIndex,
   ]);
 
+//   console.log(scale, position)
+
   const { size, camera, raycaster } = useThree();
   const ref = useRef();
   const pointer = useMemo(() => new THREE.Vector2(), []);
@@ -88,6 +90,7 @@ const FlapComponent = React.memo(function FlapComponent({
     //   console.log(spaceRef)
       if (intersects[0] !== undefined) {
         if (intersects[0].object.name === "available") {
+          // console.log("here");
           const { xIndex, topAsset, bottomAsset } =
             intersects[0].object.userData;
 

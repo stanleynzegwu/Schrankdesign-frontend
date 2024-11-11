@@ -12,22 +12,14 @@ import useDndStore from "../../zustand/dndStore"
 
 let intersects = new Array(1)
 
-const LedLightingComponent = React.memo(function LedLightingComponent(props) {
+const LedLightingComponent = React.memo(function LedLightingComponent({asset, spaceRef}) {
   const { size, camera, raycaster } = useThree()
 
-  const { xIndex, position, initialScale, spaceRef } = props
-
-  const [scale, setScale] = useState(initialScale)
-  useEffect(() => {
-    setScale(initialScale)
-  }, [initialScale])
-
+  const { xIndex, position, scale } = asset;
   const pointer = useMemo(() => new THREE.Vector2(), [])
-
   const ref = useRef()
 
   const viewOption = useCornerStore.use.viewOption()
-
   const height = useDimensionStore.use.height()
   const depth = useDimensionStore.use.depth()
   const width = useDimensionStore.use.width()
@@ -62,17 +54,17 @@ const LedLightingComponent = React.memo(function LedLightingComponent(props) {
             position[2]
           )
 
-          if (
-            scale[0] !== intersects[0].object.geometry.parameters.width ||
-            scale[1] !== intersects[0].object.geometry.parameters.height ||
-            scale[2] !== initialScale[2]
-          ) {
-            setScale([
-              intersects[0].object.geometry.parameters.width,
-              intersects[0].object.geometry.parameters.height,
-              initialScale[2],
-            ])
-          }
+          // if (
+          //   scale[0] !== intersects[0].object.geometry.parameters.width ||
+          //   scale[1] !== intersects[0].object.geometry.parameters.height ||
+          //   scale[2] !== initialScale[2]
+          // ) {
+          //   setScale([
+          //     intersects[0].object.geometry.parameters.width,
+          //     intersects[0].object.geometry.parameters.height,
+          //     initialScale[2],
+          //   ])
+          // }
         } else {
           ref.current?.position.set(
             intersects[0].point.x * 100 + width / 2,
@@ -82,7 +74,7 @@ const LedLightingComponent = React.memo(function LedLightingComponent(props) {
         }
       }
     },
-    [ref, scale, initialScale, spaceRef]
+    [ref, scale, scale, spaceRef]
   )
 
   const handleDragEnd = useCallback(

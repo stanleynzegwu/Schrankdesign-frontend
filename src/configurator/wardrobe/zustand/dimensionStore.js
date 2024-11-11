@@ -1,5 +1,5 @@
 import createSelectors from "./createSelectors"
-import Config from "../../config"
+import Config from "@src/configurator/config"
 import { create } from "zustand"
 
 const useDimensionStore = createSelectors(
@@ -10,6 +10,7 @@ const useDimensionStore = createSelectors(
     manual: false,
     elementsCount: 0,
     elementsWidths: [],
+    innerHeight: [],
     eWidthsFixed: [],
     baseType: Config.baseType.panel,
     enableCutout: false,
@@ -206,6 +207,7 @@ const useDimensionStore = createSelectors(
     setManual: (manual) => set({manual}),
     setElementsCount: (elementsCount) => set({elementsCount}),
     setElementsWidths: (elementsWidths) => set({elementsWidths}),
+    setInnerHeight: (innerHeight) => set({innerHeight}),
     setEWidthsFixed: (eWidthsFixed) => set({eWidthsFixed}),
     setBaseType: (baseType) => set({baseType}),
     setEnableCoutout: (enableCutout) => set({enableCutout}),
@@ -283,4 +285,4 @@ const useDimensionStore = createSelectors(
   }))
 )
 
-export default useDimensionStore
+export default useDimensionStore;

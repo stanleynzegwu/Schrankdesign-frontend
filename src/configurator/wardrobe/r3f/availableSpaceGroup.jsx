@@ -1,50 +1,73 @@
-/* eslint-disable react/no-unknown-property */
-import { Plane } from "@react-three/drei"
-import React, { useEffect, useMemo, useRef } from "react"
-import useDndStore from "../zustand/dndStore"
-import useFurnishingStore from "../zustand/furnishingStore"
+import { Plane } from "@react-three/drei";
+import Config from "../../config";
+import useDndStore from "../zustand/dndStore";
+import React, { useEffect, useMemo, useRef } from "react";
+import useDimensionStore from "../zustand/dimensionStore";
+import useFurnishingStore from "../zustand/furnishingStore";
+
 import {
   getLedSpace,
   getDoorSpace,
   getAvailableSpace,
-} from "../utils/availableSpace"
-import useDimensionStore from "../zustand/dimensionStore"
-import Config from "../../config"
+  unavailableSpace,
+} from "../utils/availableSpace";
 
-const AvailableSpaceGroup = React.memo(function AvailableSpaceGroup(props) {
-  const { setSpaceRef } = props
+const AvailableSpaceGroup = React.memo(function AvailableSpaceGroup({ setSpaceRef }) {
+  const type = useDndStore.use.type();
+  const currentIndex = useDndStore.use.currentIndex();
+  const drawerHeight = useDndStore.use.drawerHeight();
+  const drawerTopDistance = useDndStore.use.drawerTopDistance();
+  const productDragging = useDndStore.use.productDragging();
+  const assetDragging = useDndStore.use.assetDragging();
 
-  const type = useDndStore.use.type()
-  const drawerHeight = useDndStore.use.drawerHeight()
-  const drawerTopDistance = useDndStore.use.drawerTopDistance()
-  const productDragging = useDndStore.use.productDragging()
-  const assetDragging = useDndStore.use.assetDragging()
+  const furnishingAssets = useFurnishingStore.use.furnishingAssets();
+  const ledAssets = useFurnishingStore.use.ledAssets();
+  const doorAssets = useFurnishingStore.use.doorAssets();
+  const setTotalSpace = useFurnishingStore.use.setTotalSpace();
+  const selectionInfo = useFurnishingStore.use.selectionInfo();
 
-  const height = useDimensionStore.use.height()
-  const depth = useDimensionStore.use.depth()
-  const elementsWidths = useDimensionStore.use.elementsWidths()
-  const baseType = useDimensionStore.use.baseType()
-
-  const furnishingAssets = useFurnishingStore.use.furnishingAssets()
-  const ledAssets = useFurnishingStore.use.ledAssets()
-  const doorAssets = useFurnishingStore.use.doorAssets()
-  const setTotalSpace = useFurnishingStore.use.setTotalSpace()
-  const selectionInfo = useFurnishingStore.use.selectionInfo()
-  const korpusMaterial = useDimensionStore.use.korpusMaterial()
-  const korpusType = useDimensionStore.use.korpusType()
+  const korpusMaterial = useDimensionStore.use.korpusMaterial();
+  const korpusType = useDimensionStore.use.korpusType();
   const withOutFeet = useDimensionStore.use.withOutFeet();
   const hanging = useDimensionStore.use.hanging();
   const withFeet = useDimensionStore.use.withFeet();
-  // already located assets, total available space
-  // calculate total space for dragging
-  // console.log(furnishingAssets)
+  const height = useDimensionStore.use.height();
+  const depth = useDimensionStore.use.depth();
+  const baseType = useDimensionStore.use.baseType();
+  const elementsWidths = useDimensionStore.use.elementsWidths();
+  const setInnerHeight = useDimensionStore.use.setInnerHeight();
+
+  const availableRef = useRef();
+
+  const totalUnavailableSpace = useMemo(() => {
+    if (type === Config.furnishing.type.door || type === Config.furnishing.type.flap) return [];
+    return unavailableSpace({
+      elementsWidths,
+      baseType,
+      height,
+      depth,
+      type,
+      drawerHeight,
+      drawerTopDistance,
+      furnishingAssets,
+      doorAssets,
+      assetDragging,
+      selectionInfo,
+      korpusMaterial,
+      hanging,
+      withFeet,
+      withOutFeet,
+      currentIndex,
+    });
+  });
+
   const totalSpace = useMemo(() => {
-    if (type === Config.furnishing.type.ledLighting) {
-      
-      return getLedSpace(elementsWidths, baseType, height, depth, ledAssets)
-    } else if (type === Config.furnishing.type.door || type === Config.furnishing.type.flap) {
-      let withFeetFlag = (hanging && !withOutFeet) || (!hanging && withOutFeet)
-      return getDoorSpace(
+    if (type === Config.furnishing.type.ledLighting)
+      return getLedSpace(elementsWidths, baseType, height, depth, ledAssets);
+
+    if (type === Config.furnishing.type.door || type === Config.furnishing.type.flap) {
+      let withFeetFlag = (hanging && !withOutFeet) || (!hanging && withOutFeet);
+      return getDoorSpace({
         elementsWidths,
         baseType,
         height,
@@ -56,11 +79,10 @@ const AvailableSpaceGroup = React.memo(function AvailableSpaceGroup(props) {
         korpusMaterial,
         korpusType,
         type,
-        withFeetFlag
-      )
-    } 
-    else {
-      return getAvailableSpace(
+        withFeetFlag,
+      });
+    } else {
+      return getAvailableSpace({
         elementsWidths,
         baseType,
         height,
@@ -75,56 +97,104 @@ const AvailableSpaceGroup = React.memo(function AvailableSpaceGroup(props) {
         korpusMaterial,
         hanging,
         withFeet,
-        withOutFeet
-      )
+        withOutFeet,
+        currentIndex,
+      });
     }
-  }, [type, furnishingAssets, productDragging, assetDragging, selectionInfo, korpusMaterial, hanging, withOutFeet, withFeet])
+  }, [
+    type,
+    furnishingAssets,
+    productDragging,
+    assetDragging,
+    selectionInfo,
+    korpusMaterial,
+    hanging,
+    withOutFeet,
+    withFeet,
+  ]);
 
   useEffect(() => {
-    // console.log("here", totalSpace)
-    setTotalSpace(totalSpace)
-  }, [totalSpace])
-
-  const availableRef = useRef()
+    setTotalSpace(totalSpace);
+  }, [totalSpace, totalUnavailableSpace]);
 
   useEffect(() => {
-    if (availableRef !== undefined && availableRef.current !== undefined) {
-      setSpaceRef(availableRef.current)
-    }
-  }, [availableRef])
+    if (availableRef !== undefined && availableRef.current !== undefined)
+      setSpaceRef(availableRef.current);
+  }, [availableRef]);
 
   return (
     <>
       <group ref={availableRef}>
         {(productDragging || assetDragging) &&
-          totalSpace.map((space, index) => (
-            <Plane
-              key={index}
-              castShadow
-              name="available"
-              userData={{
-                xIndex: space.xIndex,
-                top: space.top,
-                bottom: space.bottom,
-                topAsset: space.topAsset,
-                bottomAsset: space.bottomAsset,
-                availableTop: space.availableTop,
-                availableBottom: space.availableBottom,
-                inDivider: space.inDivider,
-                d_xIndex: space.d_xIndex,
-                d_yPos: space.d_yPos,
-              }}
-              args={[space.width, space.height]}
-              rotateZ={Math.PI / 2}
-              position={[space.posX, space.posY, space.posZ]}
-            >
-              <meshStandardMaterial color="green" opacity={0.5} transparent />
-            </Plane>
-          ))}
+          totalSpace.map((space, index) => {
+            const {
+              type,
+              xIndex,
+              top,
+              bottom,
+              topAsset,
+              bottomAsset,
+              availableTop,
+              availableBottom,
+              inDivider,
+              d_xIndex,
+              d_yPos,
+            } = space;
+            return (
+              <Plane
+                key={index}
+                castShadow
+                name="available"
+                userData={{
+                  xIndex,
+                  top,
+                  bottom,
+                  topAsset,
+                  bottomAsset,
+                  availableTop,
+                  availableBottom,
+                  inDivider,
+                  d_xIndex,
+                  d_yPos,
+                  type,
+                }}
+                args={[space.width, space.height]}
+                rotateZ={Math.PI / 2}
+                position={[space.posX, space.posY, space.posZ]}
+              >
+                <meshStandardMaterial color="green" opacity={0.5} transparent />
+              </Plane>
+            );
+          })}
+        {(productDragging || (assetDragging && totalUnavailableSpace.length)) &&
+          totalUnavailableSpace.map((space, index) => {
+            const { type, xIndex, top, bottom, inDivider, id } = space;
+            return (
+              <Plane
+                key={index}
+                castShadow
+                name="occupied"
+                userData={{
+                  xIndex,
+                  top,
+                  bottom,
+                  inDivider,
+                  type,
+                  id,
+                }}
+                args={[space.width, space.height]}
+                rotateZ={Math.PI / 2}
+                position={[space.posX, space.posY, space.posZ]}
+              >
+                <meshStandardMaterial color="red" opacity={0} transparent />
+              </Plane>
+            );
+          })}
         {(productDragging || assetDragging) && (
           <Plane
             visible={false}
             castShadow
+            name="other"
             args={[1000, 500]}
             rotateZ={Math.PI / 2}
             position={[300, 100, depth]}
@@ -134,7 +204,7 @@ const AvailableSpaceGroup = React.memo(function AvailableSpaceGroup(props) {
         )}
       </group>
     </>
-  )
-})
+  );
+});
 
-export default AvailableSpaceGroup
+export default AvailableSpaceGroup;

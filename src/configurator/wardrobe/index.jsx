@@ -1,3 +1,66 @@
+// import R3F from "./r3f";
+// import * as THREE from "three";
+// import Sidebar from "./sidebar";
+// import Door from "./corner/door";
+// import { useCallback } from "react";
+// import Advisor from "./corner/advisor";
+// import Settings from "./corner/settings";
+// import { Canvas } from "@react-three/fiber";
+// import ViewOption from "./corner/viewOption";
+// import useDndStore from "./zustand/dndStore";
+// import { useParams } from "react-router-dom";
+// import TextureOption from "./corner/textureOption";
+// import ConfiguratorID from "./corner/configuratorID";
+// import { GetProduct } from "../../components/getProduct";
+// import ConfiguratorSave from "./corner/configuratorSave";
+
+// export default function Wardrobe() {
+//   const setProductDragging = useDndStore.use.setProductDragging();
+//   const pathname = useParams();
+//   const slug = pathname.slug ?? "SIDEBOARD";
+//   const configId = pathname.configId ?? "P0006";
+
+//   GetProduct(configId);
+
+//   const onDragOver = useCallback((e) => e.preventDefault(), []);
+//   const onDrop = useCallback((e) => e.preventDefault(), []);
+
+//   const onDragEnd = useCallback((e) => {
+//     e.preventDefault();
+//     setProductDragging(false);
+//   }, []);
+
+//   return (
+//     <div className="flex flex-col h-screen bg-Sv3n-grey" onDragEnd={onDragEnd}>
+//       <div className="flex-1 flex relative canvas-height">
+//         <Sidebar />
+
+//         <Canvas
+//           onDragOver={onDragOver}
+//           onDrop={onDrop}
+//           shadows={true}
+//           gl={{
+//             antialias: true,
+//             toneMapping: THREE.ACESFilmicToneMapping,
+//             toneMappingExposure: 1.45,
+//             preserveDrawingBuffer: true,
+//           }}
+//         >
+//           <R3F />
+//         </Canvas>
+
+//         <Advisor />
+//         <ConfiguratorSave slug={configId} />
+//         <ConfiguratorID configId={configId} slug={slug} />
+//         <Settings slug={configId} />
+//         <Door />
+//         <ViewOption />
+//         <TextureOption />
+//       </div>
+//     </div>
+//   );
+// }
+
 import { useCallback, useEffect } from "react";
 import * as THREE from "three";
 

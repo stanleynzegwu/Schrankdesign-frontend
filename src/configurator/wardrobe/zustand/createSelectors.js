@@ -1,11 +1,11 @@
 const createSelectors = (_store) => {
-  let store = _store
-  store.use = {}
+  let store = _store;
+  store.use = {};
   for (let k of Object.keys(store.getState())) {
     store.use[k] = () => store((s) => s[k])
   }
 
-  return store
+  return store;
 }
 
-export default createSelectors
+export default createSelectors;

@@ -1,8 +1,9 @@
-import Config from "../../../config"
-import ProductCard from "../../common/productCard"
-import useDimensionStore from "../../zustand/dimensionStore"
+import Config from "../../../config";
+import ProductCard from "../../common/productCard";
+import useDimensionStore from "../../zustand/dimensionStore";
+
 export default function Extras() {
-  const extra = useDimensionStore.use.extra()
+  const extra = useDimensionStore.use.extra();
   return (
     <div className="grid grid-cols-2 gap-4 mt-4">
       {extra.value.led && (
@@ -22,5 +23,5 @@ export default function Extras() {
         />
       )}
     </div>
-  )
+  );
 }

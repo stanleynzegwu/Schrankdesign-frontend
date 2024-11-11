@@ -46,4 +46,4 @@ const MeasureComponent = React.memo(function MeasureComponent({
   )
 })
 
-export default MeasureComponent
+export default MeasureComponent;

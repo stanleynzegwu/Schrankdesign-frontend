@@ -52,7 +52,6 @@ export default function BodyColors() {
           setTextureList(filteredTextureList)
         } else {
           setTextureList(data.data)
-          
         }
       }
       if (error) {
@@ -62,8 +61,6 @@ export default function BodyColors() {
     const GetPlates = async () => {
       const { data, error } = await GetallPlates()
       if (data) {
-        // console.log(data.data)
-        // setTextureList(data.data)
         const farben = data.data.filter((item, index) => {
           return item.plate_sort === "Farben" && textureActive[index]
         })
@@ -82,12 +79,11 @@ export default function BodyColors() {
         setFurnierList(furnier)
       }
       if (error) {
-        // setIsLoading(false)
         console.log(error?.message)
       }
     }
-    GetPlates()
-    getTexture()
+    // GetPlates()
+    // getTexture()
   }, [textureActive])
 
   const [activeTab, setActiveTab] = useState(

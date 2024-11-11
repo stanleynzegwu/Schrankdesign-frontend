@@ -11,12 +11,12 @@ import {
   getDoorWidth,
   getDrawerPlateScale,
   getInternalDrawerScale,
-  // getOuterDrawerScale,
+  getOuterDrawerScale,
 } from "../utils/getInfo"
 import useDimensionStore from "../zustand/dimensionStore"
 import { roundNumber } from "../utils/formatNumber"
 import { jsPDF } from "jspdf"
-// import { autoTable } from "jspdf-autotable"
+import { autoTable } from "jspdf-autotable"
 import priceIcon from "../../../assets/icons/priceIcon.png";
 import partlistIcon from "../../../assets/icons/partlistIcon.png";
 
@@ -83,16 +83,17 @@ const Footer = React.memo(function Footer() {
         })
 
         if (asset.type === Config.furnishing.type.drawer) {
-          // const outerDrawerScale = getOuterDrawerScale(
-          //   asset.scale,
-          //   depth,
-          //   (asset.inDivider ? asset.d_xIndex : asset.xIndex) === 0
-          //     ? Config.elementIndex.first
-          //     : asset.xIndex === elementsCount - 1
-          //     ? Config.elementIndex.last
-          //     : Config.elementIndex.middle,
-          //   asset.topShelfDistance
-          // )
+          const outerDrawerScale = getOuterDrawerScale(
+            asset.scale,
+            depth,
+            (asset.inDivider ? asset.d_xIndex : asset.xIndex) === 0
+              ? Config.elementIndex.first
+              : asset.xIndex === elementsCount - 1
+              ? Config.elementIndex.last
+              : Config.elementIndex.middle,
+            asset.topShelfDistance
+          )
+          // console.log(outerDrawerScale)
           // furnishingPlates.push({
           //   color: "White",
           //   id: "Drawer-Front",
@@ -210,7 +211,10 @@ const Footer = React.memo(function Footer() {
       plate_info[key]["Plate-pcs-type"]++
       plate_info[key]["Cut-Plate-m-pcs"] +=
         ((plate.length + plate.depth) * 2) / 100
-      plate_info[key]["Plate-m2-type"] += (((plate.length * plate.depth) / 10000) * (100 + calcInfo.info["Plate-waste"])) / 100
+      plate_info[key]["Plate-m2-type"] +=
+        (((plate.length * plate.depth) / 10000) *
+          (100 + calcInfo.info["Plate-waste"])) /
+        100
 
       if (calcInfo["plates_types"][plate.id]) {
         cnc_time_total = roundNumber(
@@ -492,6 +496,7 @@ const Footer = React.memo(function Footer() {
       "CNC-time-total": " hr",
       "CNC-cost-total": " €",
     }
+    // console.log(calcInfo.info["CNC-Prep-time"])
     cnc_cost["Plates-pcs-total"] = plate_cost["Total"]["Plate-pcs-type"]
     cnc_cost["CNC-time-total"] = roundNumber(
       (cnc_time_total + calcInfo.info["CNC-Prep-time"]) / 60

@@ -1,4 +1,3 @@
-/* eslint-disable react/no-unknown-property */
 import ExteriorPlates from "./exteriorPlates";
 import DimensionGroup from "./dimensionGroup";
 import FurnishingGroup from "./furnishingGroup";
@@ -10,6 +9,8 @@ import useCornerStore from "../zustand/cornerStore";
 import BackgroundGroup from "./backgroundGroup";
 
 const WardrobeGroup = React.memo(function WardrobeGroup() {
+  const { front, dimension } = Config.view;
+
   const width = useDimensionStore.use.width();
   const height = useDimensionStore.use.height();
   const depth = useDimensionStore.use.depth();
@@ -17,30 +18,17 @@ const WardrobeGroup = React.memo(function WardrobeGroup() {
   const hangingSize = useDimensionStore.use.hangingSize();
   const isCornerView = useDimensionStore.use.isCornerView();
   const withFeet = useDimensionStore.use.withFeet();
-
   const viewOption = useCornerStore.use.viewOption();
-
-  const elementsCount = useDimensionStore.use.elementsCount();
-  const elementsWidths = useDimensionStore.use.elementsWidths();
   const { camera, controls } = useThree();
-  useEffect(() => {
 
-    const cameraScaleH = height/40
-    const cameraScaleW = 3*width/200
-    let cameraScale = cameraScaleH > cameraScaleW ? cameraScaleH : cameraScaleW
-    // console.log(cameraScale)
+  useEffect(() => {
+    const cameraScaleH = height / 40;
+    const cameraScaleW = (3 * width) / 200;
+    let cameraScale = cameraScaleH > cameraScaleW ? cameraScaleH : cameraScaleW;
     if (controls === null) return;
 
-    if (
-      viewOption === Config.view.front ||
-      viewOption === Config.view.dimension
-    ) {
-      // camera.position.set(
-      //   0,
-      //   0,
-      //   width > 600 ? 8 : width < 300 && height < 100 ? 4 : 6
-      // );
-      camera.position.set(0, 0, cameraScale)
+    if (viewOption === front || viewOption === dimension) {
+      camera.position.set(0, 0, cameraScale);
       controls.target.set(0, 0, 0);
       controls.enabled = false;
       controls.update();
@@ -57,34 +45,24 @@ const WardrobeGroup = React.memo(function WardrobeGroup() {
       }
     }
   }, [viewOption, isCornerView, width, height]);
+
   return (
-        <group
-          dispose={null}
-          position={[-width / 200, -height / 200, -depth / 200]}
-          scale={[0.01, 0.01, 0.01]}
-          castShadow
-        >
-          <group
-            position={[
-              0,
-              hanging === true ? 25 : withFeet ? hangingSize : 0,
-              0,
-            ]}
-          >
-            {elementsCount !== 0 && (
-              <Suspense fallback={null}>
-                <ExteriorPlates />
-              </Suspense>
-            )}
-            <Suspense fallback={null}>
-              <FurnishingGroup />
-            </Suspense>
-          </group>
+    <group
+      dispose={null}
+      position={[-width / 200, -height / 200, -depth / 200]}
+      scale={[0.01, 0.01, 0.01]}
+      castShadow
+    >
+      <group position={[0, hanging === true ? 25 : withFeet ? hangingSize : 0, 0]}>
+        <Suspense>
+          <ExteriorPlates />
+          <FurnishingGroup />
+        </Suspense>
+      </group>
 
-          <DimensionGroup />
-
-          <BackgroundGroup />
-        </group>
+      <DimensionGroup />
+      <BackgroundGroup />
+    </group>
   );
 });
 

@@ -6,24 +6,13 @@ import * as THREE from "three"
 const baseUrl = 'https://storage.googleapis.com/schrankdesign-uploads/textures/';
 const WoodMaterial = React.memo(function WoodMaterial({ mName, type }) {
   const [wood_texture, wood_normalMap, wood_armMap, wood_metalMap, wood_roughMap] = 
-    mName.initial  ?
-    useLoader(
-    THREE.TextureLoader,
-    [
+    useLoader(THREE.TextureLoader, [
       mName.map,
       mName.normalMap,
       mName.aoMap,
       mName.metalnessMap,
       mName.roughnessMap
-    ]) : useLoader(
-      THREE.TextureLoader,
-      [
-        mName.map,
-        mName.normalMap,
-        mName.aoMap,
-        mName.metalnessMap,
-        mName.roughnessMap
-      ])
+    ])
   const [property, setProperty] = useState()
   useEffect(() => {
     if (typeof mName === 'string') {
@@ -148,16 +137,13 @@ const WoodMaterial = React.memo(function WoodMaterial({ mName, type }) {
     <>
       <meshPhysicalMaterial
         onBeforeCompile={onBeoforeCompile}
-        customProgramCacheKey={function () {
-          return type
-        }}
+        customProgramCacheKey={() => type}
         attach="material"
         map={wood_texture}
         normalMap={wood_normalMap}
         aoMap={wood_armMap}
         roughnessMap={wood_roughMap}
         metalnessMap={wood_metalMap}
-        // {...Config.material[mName]}
         {...mName.property}
       />
     </>

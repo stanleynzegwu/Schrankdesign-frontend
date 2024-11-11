@@ -54,7 +54,7 @@ const ConfiguratorSave = React.memo(function ConfiguratorSave({ slug }) {
 
   const storedUser = localStorage.getItem("schrankdesign-app-user");
   const auth = JSON.parse(storedUser);
-  const _id = slug
+  const _id = slug;
 
   const saveFun = useCallback(async () => {
     const configuratorData = {
@@ -67,7 +67,6 @@ const ConfiguratorSave = React.memo(function ConfiguratorSave({ slug }) {
       furnishingAssets,
       doorAssets,
       griffAssets,
-
       width,
       height,
       manual,
@@ -101,6 +100,12 @@ const ConfiguratorSave = React.memo(function ConfiguratorSave({ slug }) {
       frontTexture,
       frontInfo
     };
+
+    // ! we need to clean what is not needed
+    // loop over all spaces, get xIndex as unique then remove all furnishingAssets that not match
+
+    // console.log(configuratorData)
+
     const { status } = await SaveConfigurator(_id, configuratorData);
     if (status.status) {
       toast.success("Save Successfully!");
@@ -117,7 +122,6 @@ const ConfiguratorSave = React.memo(function ConfiguratorSave({ slug }) {
     furnishingAssets,
     doorAssets,
     griffAssets,
-
     width,
     height,
     manual,
@@ -154,7 +158,7 @@ const ConfiguratorSave = React.memo(function ConfiguratorSave({ slug }) {
 
   return (
     <div className="absolute left-[623px] top-[20px] ">
-      {auth?.role == 1 ? (
+      {(import.meta.env.MODE === 'development' || auth?.role == 1) && (
         <Button
           className=" bg-[#ffffff] border border-black text-[#000000] normal-case text-[14px] flex items-center gap-2 rounded-[2px] pl-[10px] pr-[6px] h-[39px]"
           onClick={() => {
@@ -164,8 +168,6 @@ const ConfiguratorSave = React.memo(function ConfiguratorSave({ slug }) {
           <img src={configuratorSaveIcon}></img>
           Konfigurator speichern
         </Button>
-      ) : (
-        <></>
       )}
     </div>
   );

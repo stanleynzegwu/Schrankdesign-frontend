@@ -1,11 +1,4 @@
-import * as THREE from "three"
-import { extend } from "@react-three/fiber"
-import { RoundedBoxGeometry } from "three-stdlib"
-// import { drawer } from "@material-tailwind/react"
-
-extend({ RoundedBoxGeometry })
-
-// global config
+import * as THREE from "three";
 
 const Config = {
   init: {
@@ -113,8 +106,9 @@ const Config = {
       handleDirection: "H"
     },
     shelf: {
-      raster: 3.2,
-      interval: 16,
+      raster: 1,
+      interval: 16, // minus the thickness1 = 14.1 rounded to 14
+      minDistance: 14,
       thickness1: 1.9,
       thickness2: 2.5,
       minWidth: 15,
@@ -124,7 +118,8 @@ const Config = {
       material: new THREE.MeshPhysicalMaterial(),
     },
     glassBottom: {
-      raster: 3.2,
+      raster: 1,
+      minDistance: 14,
       thickness: 0.5,
       material: new THREE.MeshPhysicalMaterial({
         color: 0x6f5c56,
@@ -133,6 +128,7 @@ const Config = {
       }),
     },
     foldBottom: {
+      minDistance: 14,
       minWidth: 15,
       maxWidth: 120,
       minDepth: 30,
@@ -141,6 +137,7 @@ const Config = {
       thickness2: 2.5,
     },
     drawer: {
+      minDistance: 14,
       backSpace: 1,
       thickness: 1.6,
       sideIncident: 0.5,
@@ -154,7 +151,7 @@ const Config = {
       depthRange: [26, 31, 36, 41, 46, 51, 56, 61, 66],
       defaultDepth: 56,
       defaultWidth: 55.2,
-      defaultHeight: [8, 16, 24, 14],
+      defaultHeight: [8, 14, 16, 24], // + 1.9 + 1.9 + 0.7
       heightInterval: 0.3,
       material: new THREE.MeshPhysicalMaterial(),
       type: {
@@ -243,6 +240,7 @@ const Config = {
       mirror: "mirror",
       sliding: "sliding",
     },
+    min_height: 30,
     mirror_thickness: 0.5,
     defaultHeight: 200,
     defaultWidth: 50,
@@ -265,7 +263,6 @@ const Config = {
       min: 26,
       max: 75
     },
-    min_height: 30,
     flap_height_range: {
       min: 20,
       max: 50

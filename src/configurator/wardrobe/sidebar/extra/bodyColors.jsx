@@ -1,98 +1,75 @@
-import {
-  Tabs,
-  TabsHeader,
-  TabsBody,
-  TabPanel,
-  Tab,
-} from "@material-tailwind/react"
-import { useState, useEffect } from "react"
+import { useState, useEffect } from "react";
+import Config from "../../../config";
+import ColorCard from "../../common/colorCard";
+import useDimensionStore from "../../zustand/dimensionStore";
+import { GetallPlates, GetTexture } from "../../../../Functions-configurator/Function-configurator";
+import { Tabs, TabsHeader, TabsBody, TabPanel, Tab } from "@material-tailwind/react";
 
-import ColorCard from "../../common/colorCard"
-import Config from "../../../config"
-import useDimensionStore from "../../zustand/dimensionStore"
-import { GetTexture, GetallPlates } from "../../../../Functions-configurator/Function-configurator"
-// const baseUrl = 'https://storage.googleapis.com/schrankdesign-uploads/textures/';
-const baseUrl = import.meta.env.VITE_BACKEND_URL_img
+const baseUrl = import.meta.env.VITE_BACKEND_URL_img;
+
 export default function BodyColors() {
-  const bodyColor = useDimensionStore.use.bodyColor()
-  const textureActive = useDimensionStore.use.textureActive()
-  const [tab_data, setTabData] =useState([])
-  const [textureList, setTextureList] = useState([])
-  const [farbenList, setFarbenList] = useState([])
-  const [holzList, setHolzList] = useState([])
-  const [holzdekor, setHolzdekor] = useState([])
-  const [furnierList, setFurnierList] = useState([])
-  useEffect(() => {
-    let temp = []
-    if (bodyColor.value.color) {
-      temp.push({ label: "Farben", value: "color" })
-    }
-    if (bodyColor.value.wood) {
-      temp.push({ label: "Holz", value: "woodDecor"})
-    }
-    if (bodyColor.value.venner) {
-      temp.push({ label: "Holzdekor", value: "wood" })
-    }
-    if (bodyColor.value.solid) {
-      temp.push({ label: "Furnier", value: "special" })
-    }
-    setTabData(temp)
-  }, [bodyColor])
+  const bodyColor = useDimensionStore.use.bodyColor();
+  const textureActive = useDimensionStore.use.textureActive();
+  const [tab_data, setTabData] = useState([]);
+  const [textureList, setTextureList] = useState([]);
+  const [farbenList, setFarbenList] = useState([]);
+  const [holzList, setHolzList] = useState([]);
+  const [holzdekor, setHolzdekor] = useState([]);
+  const [furnierList, setFurnierList] = useState([]);
+
+  const getTexture = async () => {
+    const { data } = await GetTexture();
+    if (!data) return;
+    if (textureActive.length < 1) return setTextureList(data.data);
+    const filteredTextureList = data.data.filter((texture, index) => textureActive[index]);
+    setTextureList(filteredTextureList);
+  };
+
+  const GetPlates = async () => {
+    const { data } = await GetallPlates();
+    if (!data) return;
+    const farben = data.data.filter(
+      (item, index) => item.plate_sort === "Farben" && textureActive[index]
+    );
+    const holz = data.data.filter(
+      (item, index) => item.plate_sort === "Holz" && textureActive[index]
+    );
+    const holzdek = data.data.filter(
+      (item, index) => item.plate_sort === "Holzdekor" && textureActive[index]
+    );
+    const furnier = data.data.filter(
+      (item, index) => item.plate_sort === "Furnier" && textureActive[index]
+    );
+    setHolzdekor(holzdek);
+    setHolzList(holz);
+    setFarbenList(farben);
+    setFurnierList(furnier);
+  };
 
   useEffect(() => {
-    const getTexture = async () => {
-      const { data, error } = await GetTexture();
-      if (data) {
-        if ( textureActive.length > 0) {
-          const filteredTextureList = data.data.filter((texture, index) => {
-            return textureActive[index]
-          })
-          setTextureList(filteredTextureList)
-        } else {
-          setTextureList(data.data)
-          
-        }
-      }
-      if (error) {
-        console.log(error?.message);
-      }
-    };
-    const GetPlates = async () => {
-      const { data, error } = await GetallPlates()
-      if (data) {
-        // console.log(data.data)
-        // setTextureList(data.data)
-        const farben = data.data.filter((item, index) => {
-          return item.plate_sort === "Farben" && textureActive[index]
-        })
-        setFarbenList(farben)
-        const holz = data.data.filter((item, index) => {
-          return item.plate_sort === "Holz"  && textureActive[index]
-        })
-        setHolzList(holz)
-        const holzdek = data.data.filter((item, index) => {
-          return item.plate_sort === "Holzdekor"  && textureActive[index]
-        })
-        setHolzdekor(holzdek)
-        const furnier = data.data.filter((item, index) => {
-          return item.plate_sort === "Furnier"  && textureActive[index]
-        })
-        setFurnierList(furnier)
-      }
-      if (error) {
-        // setIsLoading(false)
-        console.log(error?.message)
-      }
-    }
-    // GetPlates()
-    // getTexture()
-  }, [textureActive])
+    let temp = [];
+    if (bodyColor.value.color) temp.push({ label: "Farben", value: "color" });
+    if (bodyColor.value.wood) temp.push({ label: "Holz", value: "woodDecor" });
+    if (bodyColor.value.venner) temp.push({ label: "Holzdekor", value: "wood" });
+    if (bodyColor.value.solid) temp.push({ label: "Furnier", value: "special" });
+    setTabData(temp);
+  }, [bodyColor]);
+
+  useEffect(() => {
+    GetPlates();
+    getTexture();
+  }, [textureActive]);
+
   const [activeTab, setActiveTab] = useState(
-    bodyColor.value.color ? "color"
-      : bodyColor.value.wood ? "woodDecor"
-        : bodyColor.value.venner ? "wood"
-          : "special"
-  )
+    bodyColor.value.color
+      ? "color"
+      : bodyColor.value.wood
+      ? "woodDecor"
+      : bodyColor.value.venner
+      ? "wood"
+      : "special"
+  );
+
   return (
     <Tabs value={activeTab} className="py-4">
       <TabsHeader
@@ -127,16 +104,14 @@ export default function BodyColors() {
                     textureId={item.texture_id}
                     textureType={Config.color.color.type0}
                     category={Config.color.category.body}
-                    bodyInfo={
-                      {
-                        name: item.name,
-                        thickness: item.plate_thickness,
-                        surface: item.surface_structure,
-                        coating: item.coating,
-                        thumbnail: baseUrl + item.images[0],
-                        description: item.description
-                      }
-                    }
+                    bodyInfo={{
+                      name: item.name,
+                      thickness: item.plate_thickness,
+                      surface: item.surface_structure,
+                      coating: item.coating,
+                      thumbnail: baseUrl + item.images[0],
+                      description: item.description,
+                    }}
                   />
                 ))}
               </div>
@@ -146,11 +121,7 @@ export default function BodyColors() {
           </TabPanel>
         )}
         {bodyColor.value.venner && (
-          <TabPanel
-            key="woodDecor"
-            value="woodDecor"
-            className="py-1 px-0"
-          >
+          <TabPanel key="woodDecor" value="woodDecor" className="py-1 px-0">
             {holzList.length > 0 ? (
               <div className="grid grid-cols-3 gap-4">
                 {holzList.map((item, index) => (
@@ -162,16 +133,14 @@ export default function BodyColors() {
                     type={Config.color.type.venner}
                     textureId={item.texture_id}
                     category={Config.color.category.body}
-                    bodyInfo={
-                      {
-                        name: item.name,
-                        thickness: item.plate_thickness,
-                        surface: item.surface_structure,
-                        coating: item.coating,
-                        thumbnail: baseUrl + item.images[0],
-                        description: item.description
-                      }
-                    }
+                    bodyInfo={{
+                      name: item.name,
+                      thickness: item.plate_thickness,
+                      surface: item.surface_structure,
+                      coating: item.coating,
+                      thumbnail: baseUrl + item.images[0],
+                      description: item.description,
+                    }}
                   />
                 ))}
               </div>
@@ -193,16 +162,14 @@ export default function BodyColors() {
                     type={Config.color.type.wood}
                     textureId={item.texture_id}
                     category={Config.color.category.body}
-                    bodyInfo={
-                      {
-                        name: item.name,
-                        thickness: item.plate_thickness,
-                        surface: item.surface_structure,
-                        coating: item.coating,
-                        thumbnail: baseUrl + item.images[0],
-                        description: item.description
-                      }
-                    }
+                    bodyInfo={{
+                      name: item.name,
+                      thickness: item.plate_thickness,
+                      surface: item.surface_structure,
+                      coating: item.coating,
+                      thumbnail: baseUrl + item.images[0],
+                      description: item.description,
+                    }}
                   />
                 ))}
               </div>
@@ -212,11 +179,7 @@ export default function BodyColors() {
           </TabPanel>
         )}
         {bodyColor.value.solid && (
-          <TabPanel
-            key="special"
-            value="special"
-            className="py-1 px-0"
-          >
+          <TabPanel key="special" value="special" className="py-1 px-0">
             {furnierList.length > 0 ? (
               <div className="grid grid-cols-3 gap-4">
                 {furnierList.map((item, index) => (
@@ -229,16 +192,14 @@ export default function BodyColors() {
                     textureType={Config.color.special.type0}
                     textureId={item.texture_id}
                     category={Config.color.category.body}
-                    bodyInfo={
-                      {
-                        name: item.name,
-                        thickness: item.plate_thickness,
-                        surface: item.surface_structure,
-                        coating: item.coating,
-                        thumbnail: baseUrl + item.images[0],
-                        description: item.description
-                      }
-                    }
+                    bodyInfo={{
+                      name: item.name,
+                      thickness: item.plate_thickness,
+                      surface: item.surface_structure,
+                      coating: item.coating,
+                      thumbnail: baseUrl + item.images[0],
+                      description: item.description,
+                    }}
                   />
                 ))}
               </div>
@@ -249,5 +210,5 @@ export default function BodyColors() {
         )}
       </TabsBody>
     </Tabs>
-  )
+  );
 }

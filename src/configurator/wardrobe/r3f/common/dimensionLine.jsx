@@ -55,8 +55,8 @@ const DimensionLine = React.memo(function DimensionLine(props) {
             <div
               className={
                 isBig
-                  ? "border-[2px] border-black border-solid rounded-[5px] bg-[#F6F6F6]"
-                  : "border-[1px] border-black border-solid rounded-[5px] bg-[#F6F6F6]"
+                  ? "border-[2px] border-black border-solid rounded-[5px] bg-[#F6F6F6] text-black"
+                  : "border-[1px] border-black border-solid rounded-[5px] bg-[#F6F6F6] text-black"
               }
             >
               <Typography
