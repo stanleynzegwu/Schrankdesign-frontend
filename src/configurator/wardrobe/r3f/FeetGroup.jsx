@@ -26,7 +26,7 @@ const FeetGroup = React.memo(function FeetGroup() {
   const feetInfo = useMemo(() => {
     return getFeetInfo(feet, width, feetIndex, feetListIndex);
   }, [feet, width, feetIndex, feetListIndex]);
-  const [feetsInfo, setFeetsInfo] = useState({})
+  const [feetsInfo, setFeetsInfo] = useState({});
 
   let model = feetInfo?.gltf ? useLoader(FBXLoader, feetInfo.gltf) : undefined;
   let middleModel = [];
@@ -38,12 +38,12 @@ const FeetGroup = React.memo(function FeetGroup() {
       const modelSize = box.getSize(size);
       if (feetInfo.feetHeight) {
         setModelScale(feetInfo.feetHeight / modelSize.y);
-      }else {
+      } else {
         setModelScale(modelHeight / modelSize.y);
       }
       setFeets(feetInfo);
     }
-    setFeetCount((feetInfo.middleFeetCount+2)*2)
+    setFeetCount((feetInfo.middleFeetCount + 2) * 2);
   }, [feetInfo, feets]);
 
   useEffect(() => {
@@ -61,16 +61,12 @@ const FeetGroup = React.memo(function FeetGroup() {
     <group>
       {modelScale !== undefined && withFeet && model !== undefined && (
         <>
-          //* Front Feet
+          {/* Front Feet */}
           <FeetModel
             rotation={[0, (feets.offSet * Math.PI) / 180, 0]}
             scale={modelScale}
             object={model}
-            position={[
-              feets.frontFeetX,
-              Config.plate.plinthHeight,
-              depth - feets.frontFeetZ,
-            ]}
+            position={[feets.frontFeetX, Config.plate.plinthHeight, depth - feets.frontFeetZ]}
             offSet={[feets.xOffset, feets.yOffset, feets.zOffset]}
           />
           <FeetModel
@@ -84,39 +80,27 @@ const FeetGroup = React.memo(function FeetGroup() {
             ]}
             offSet={[feets.xOffset, feets.yOffset, feets.zOffset]}
           />
-          //* Back Feet
+          {/* Back Feet */}
           <FeetModel
-            rotation={[0, (feets.offSet * Math.PI) / 180 + Math.PI * 3 / 2, 0]}
+            rotation={[0, (feets.offSet * Math.PI) / 180 + (Math.PI * 3) / 2, 0]}
             scale={modelScale}
             object={model}
-            position={[
-              feets.backFeetX,
-              Config.plate.plinthHeight,
-              feets.backFeetZ,
-            ]}
+            position={[feets.backFeetX, Config.plate.plinthHeight, feets.backFeetZ]}
             offSet={[feets.xOffset, feets.yOffset, feets.zOffset]}
           />
           <FeetModel
             rotation={[0, (feets.offSet * Math.PI) / 180 + Math.PI, 0]}
             scale={modelScale}
             object={model}
-            position={[
-              width - feets.backFeetX,
-              Config.plate.plinthHeight,
-              feets.backFeetZ,
-            ]}
+            position={[width - feets.backFeetX, Config.plate.plinthHeight, feets.backFeetZ]}
             offSet={[feets.xOffset, feets.yOffset, feets.zOffset]}
           />
-          //* middle Feet
+          {/* middle Feet */}
           {middleModel.map((middle, index) => {
             return (
-              <>
+              <React.Fragment key={index}>
                 <FeetModel
-                  rotation={[
-                    0,
-                    ((feets.offSet + feets.middleOffset) * Math.PI) / 180,
-                    0,
-                  ]}
+                  rotation={[0, ((feets.offSet + feets.middleOffset) * Math.PI) / 180, 0]}
                   scale={modelScale}
                   object={model}
                   position={[
@@ -127,11 +111,7 @@ const FeetGroup = React.memo(function FeetGroup() {
                   offSet={[feets.xOffset, feets.yOffset, feets.zOffset]}
                 />
                 <FeetModel
-                  rotation={[
-                    0,
-                    ((feets.offSet + feets.middleOffset) * Math.PI) / 180 + Math.PI,
-                    0,
-                  ]}
+                  rotation={[0, ((feets.offSet + feets.middleOffset) * Math.PI) / 180 + Math.PI, 0]}
                   scale={modelScale}
                   object={model}
                   position={[
@@ -141,9 +121,8 @@ const FeetGroup = React.memo(function FeetGroup() {
                   ]}
                   offSet={[feets.xOffset, feets.yOffset, feets.zOffset]}
                 />
-              </>
+              </React.Fragment>
             );
-            // }
           })}
         </>
       )}
