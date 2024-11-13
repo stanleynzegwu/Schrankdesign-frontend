@@ -34,10 +34,12 @@ export const get = async (url, params) => {
 
 //  POST REQUEST
 export const post = async (url, data) => {
+  // console.log(url,data)
   try {
     const res = await axios.post(`${baseUrl}${url}`, data, {
       headers: headers(),
     });
+    // console.log(res)
     return res.data;
   } catch (err) {
     throw err;
@@ -265,7 +267,7 @@ export const GetConfiguratorData = async (id) => {
         id: id,
       }
     );
-    console.log('Sv3n', configuratorData);
+    // console.log('Sv3n', configuratorData);
     return { configuratorData, error: null };
   } catch (error) {
     return { configuratorData: null, error: error?.response?.data };

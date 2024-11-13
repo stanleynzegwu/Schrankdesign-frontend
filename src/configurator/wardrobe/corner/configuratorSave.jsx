@@ -197,6 +197,7 @@ const ConfiguratorSave = React.memo(function ConfiguratorSave({ slug }) {
 
   const width = useDimensionStore.use.width();
   const height = useDimensionStore.use.height();
+  const depth = useDimensionStore.use.depth();
   const manual = useDimensionStore.use.manual();
   const elementsWidths = useDimensionStore.use.elementsWidths();
   const elementsCount = useDimensionStore.use.elementsCount();
@@ -235,8 +236,8 @@ const ConfiguratorSave = React.memo(function ConfiguratorSave({ slug }) {
 
   const saveFun = useCallback(async () => {
     //Get the selected feet else return null when there is no selected feet
-    const selectedFeet = withFeet ? feet[feetIndex] : null;
-    const selectedHandle = pushOpen ? null : handle[handleIndex];
+    // const selectedFeet = withFeet ? feet[feetIndex] : null;
+    // const selectedHandle = pushOpen ? null : handle[handleIndex];
 
     const configuratorData = {
       maxHeight,
@@ -250,6 +251,7 @@ const ConfiguratorSave = React.memo(function ConfiguratorSave({ slug }) {
       griffAssets,
       width,
       height,
+      depth,
       manual,
       elementsWidths,
       elementsCount,
@@ -260,15 +262,13 @@ const ConfiguratorSave = React.memo(function ConfiguratorSave({ slug }) {
       korpusForm,
       korpusType,
       korpusMaterial,
-      handle: selectedHandle,
-      // handle,
-      // handleIndex,
+      handle,
+      handleIndex,
       handleListIndex,
       handleDirection,
       pushOpen,
-      feet: selectedFeet,
-      // feet,
-      // feetIndex,
+      feet,
+      feetIndex,
       feetListIndex,
       withOutFeet,
       withFeet,
