@@ -57,6 +57,7 @@ const DrawerComponent = React.memo(function DrawerComponent({
   const furnishingAssets = useFurnishingStore.use.furnishingAssets();
   const addAsset = useFurnishingStore.use.addAsset();
   const removeAsset = useFurnishingStore.use.removeAsset();
+  const removeAssetByIndex = useFurnishingStore.use.removeAssetByIndex();
   const showDrawerShelf = useFurnishingStore.use.showDrawerShelf();
   const setSelectionInfo = useFurnishingStore.use.setSelectionInfo();
   const updateAsset = useFurnishingStore.use.updateAsset();
@@ -311,11 +312,17 @@ const DrawerComponent = React.memo(function DrawerComponent({
     [drawerHeightValue, position]
   );
 
-  const onRemoveObject = useCallback(() => {
-    removeAsset({ xIndex, yPos: position[1] });
-    removeGriff({ xIndex: xIndex, posY: position[1] });
-  }, [xIndex, position, inDivider]);
+  // const onRemoveObject = useCallback(() => {
+  //   removeAsset({ xIndex, yPos: position[1] });
+  //   removeGriff({ xIndex: xIndex, posY: position[1] });
+  // }, [xIndex, position, inDivider]);
 
+  //Remove Asset By Index, Revert show controls to false
+  const onRemoveObject = useCallback((furnishIndex) => {
+    removeAssetByIndex(furnishIndex);
+    // removeGriff({ furnishIndex });
+    setShowControl(false);
+  }, []);
   const getAvailableSpace = (initialXIndex, totalSpace, flagValue) => {
     const filter = totalSpace.filter((space) => {
       return (
@@ -682,7 +689,7 @@ const DrawerComponent = React.memo(function DrawerComponent({
                 onPointerOut={() => {
                   document.body.style.cursor = "auto";
                 }}
-                onClick={() => onRemoveObject()}
+                onClick={() => onRemoveObject(index)}
                 position={[-scale[0] / 2 + 5, 4.5, depth + 3.21 - position[2]]}
               >
                 <circleGeometry args={[5]} />
@@ -728,7 +735,7 @@ const DrawerComponent = React.memo(function DrawerComponent({
                 onPointerOut={() => {
                   document.body.style.cursor = "auto";
                 }}
-                onClick={() => onRemoveObject()}
+                onClick={() => onRemoveObject(index)}
                 position={[-scale[0] / 2 + 5, 4.5, depth + 3.21 - position[2]]}
               >
                 <circleGeometry args={[5]} />
