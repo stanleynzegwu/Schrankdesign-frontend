@@ -56,7 +56,7 @@ const DrawerComponent = React.memo(function DrawerComponent({
 
   const furnishingAssets = useFurnishingStore.use.furnishingAssets();
   const addAsset = useFurnishingStore.use.addAsset();
-  const removeAsset = useFurnishingStore.use.removeAsset();
+  //const removeAsset = useFurnishingStore.use.removeAsset();
   const removeAssetByIndex = useFurnishingStore.use.removeAssetByIndex();
   const showDrawerShelf = useFurnishingStore.use.showDrawerShelf();
   const setSelectionInfo = useFurnishingStore.use.setSelectionInfo();
@@ -70,6 +70,7 @@ const DrawerComponent = React.memo(function DrawerComponent({
   const setDrawerTopDistance = useDndStore.use.setDrawerTopDistance();
   const setType = useDndStore.use.setType();
 
+  const elementsWidths = useDimensionStore.use.elementsWidths();
   const height = useDimensionStore.use.height();
   const depth = useDimensionStore.use.depth();
   const width = useDimensionStore.use.width();
@@ -96,6 +97,9 @@ const DrawerComponent = React.memo(function DrawerComponent({
     belowTop: 0,
     belowBottom: 0,
   });
+
+  const { sideIncident } = Config.furnishing.drawer;
+  const { panelSpace, panelWidth } = Config.furnishing.internalDrawer;
 
   const [trashMap, arrowUpDownMap, plusMap] = useLoader(THREE.TextureLoader, [
     "/images/furnishing/doors/trash_blue.png",
@@ -233,14 +237,36 @@ const DrawerComponent = React.memo(function DrawerComponent({
       setShowMeasure(false);
       setAssetDragging(false);
       if (state.values[0] === state.initial[0] && state.values[1] === state.initial[1]) return;
-      if (intersects[0].object.name === "other") return removeAsset({ xIndex, yPos: position[1] });
 
-      let drawerPosition = [ref.current.position.x, ref.current.position.y, ref.current.position.z];
+      // Calculate X-axis scale based on whether it's a `Drawer` or `InternalDrawer`
+      const scaleX =
+        type === "Drawer"
+          ? elementsWidths[xIndex] - sideIncident * 2
+          : elementsWidths[xIndex] - (panelSpace + panelWidth) * 2;
+
+      if (intersects[0]?.object.name === "other") {
+        return updateAsset({
+          index,
+          newData: {
+            position: [position[0], position[1] + 0.0000000000001, position[2]],
+            // Update the asset's scale along the x-axis based on the width of the wardrobe section (xIndex).
+            // elementsWidths is an array that stores the width of each wardrobe section(xIndex).
+            scale: [scaleX, scale[1], scale[2]],
+          },
+        });
+      }
 
       const payload = {
         index,
-        asset: {
-          position: drawerPosition,
+        newData: {
+          xIndex: intersects[0].object.userData.xIndex,
+          inDivider: intersects[0].object.userData.inDivider,
+          d_xIndex: intersects[0].object.userData.d_xIndex,
+          d_yPos: intersects[0].object.userData.d_yPos,
+          position: [ref.current.position.x, ref.current.position.y, ref.current.position.z],
+          scale: scale,
+          type,
+          isShowControl: true,
         },
       };
 
@@ -312,17 +338,11 @@ const DrawerComponent = React.memo(function DrawerComponent({
     [drawerHeightValue, position]
   );
 
-  // const onRemoveObject = useCallback(() => {
-  //   removeAsset({ xIndex, yPos: position[1] });
-  //   removeGriff({ xIndex: xIndex, posY: position[1] });
-  // }, [xIndex, position, inDivider]);
-
-  //Remove Asset By Index, Revert show controls to false
   const onRemoveObject = useCallback((furnishIndex) => {
     removeAssetByIndex(furnishIndex);
-    // removeGriff({ furnishIndex });
-    setShowControl(false);
+    // setShowControl(false);
   }, []);
+
   const getAvailableSpace = (initialXIndex, totalSpace, flagValue) => {
     const filter = totalSpace.filter((space) => {
       return (
