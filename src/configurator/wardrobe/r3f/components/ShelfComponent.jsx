@@ -41,6 +41,7 @@ const ShelfComponent = React.memo(function ShelfComponent({
     previousGoingUp: null,
   });
   const { shelf, foldBottom, glassBottom } = Config.furnishing.type;
+  const { spaceSides } = Config.furnishing.default;
 
   const { setType, assetDragging, setAssetDragging, setCurrentIndex } = useDndStore((state) => ({
     setType: state.setType,
@@ -357,7 +358,7 @@ const ShelfComponent = React.memo(function ShelfComponent({
           position: [position[0], position[1] + 0.0000000000001, position[2]],
           // Update the asset's scale along the x-axis based on the width of the wardrobe section (xIndex).
           // elementsWidths is an array that stores the width of each wardrobe section(xIndex).
-          scale: [elementsWidths[xIndex], scale[1], scale[2]],
+          scale: [elementsWidths[xIndex] - spaceSides * 2, scale[1], scale[2]],
         },
       });
     }
