@@ -12,7 +12,7 @@ export const getArrayIndex = (
   return assets.findIndex((asset) => {
     const condition =
       (!inDivider &&
-        asset.inDivider === false &&
+        (asset.inDivider === false || asset.inDivider === undefined) &&
         asset.xIndex === xIndex &&
         asset.position[1] === yPos) ||
       (inDivider &&

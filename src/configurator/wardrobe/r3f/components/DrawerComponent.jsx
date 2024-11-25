@@ -236,6 +236,7 @@ const DrawerComponent = React.memo(function DrawerComponent({
     (state) => {
       setShowMeasure(false);
       setAssetDragging(false);
+      setShowControl(false);
       if (state.values[0] === state.initial[0] && state.values[1] === state.initial[1]) return;
 
       // Calculate X-axis scale based on whether it's a `Drawer` or `InternalDrawer`
@@ -271,7 +272,6 @@ const DrawerComponent = React.memo(function DrawerComponent({
       };
 
       updateAsset(payload);
-      setShowControl(true);
     },
     [ref, scale, topShelfDistance, xIndex, position, furnishingAssets]
   );
@@ -605,7 +605,7 @@ const DrawerComponent = React.memo(function DrawerComponent({
       <Plane
         args={[scale[0], 25]}
         position={[
-          planPositionX == undefined ? position[0] : planPositionX,
+          position[0],
           planPositionY == undefined ? position[1] : planPositionY,
           depth + 3.2,
         ]}
