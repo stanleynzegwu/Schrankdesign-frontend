@@ -151,7 +151,7 @@ const Config = {
       depthRange: [26, 31, 36, 41, 46, 51, 56, 61, 66],
       defaultDepth: 56,
       defaultWidth: 55.2,
-      defaultHeight: [8, 14, 16, 24], // + 1.9 + 1.9 + 0.7
+      defaultHeight: [8, 14, 19, 24], // + 1.9 + 1.9 + 0.7
       heightInterval: 0.3,
       material: new THREE.MeshPhysicalMaterial(),
       type: {
