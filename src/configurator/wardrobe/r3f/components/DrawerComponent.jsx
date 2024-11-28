@@ -199,15 +199,15 @@ const DrawerComponent = React.memo(function DrawerComponent({
           });
         }
 
-        if (asset.topVisible !== drawerTopVisible || asset.bottomVisible !== drawerBottomVisible) {
-          updateAsset({
-            index,
-            newData: {
-              topVisible: drawerTopVisible,
-              bottomVisible: drawerBottomVisible,
-            },
-          });
-        }
+        // if (asset.topVisible !== drawerTopVisible || asset.bottomVisible !== drawerBottomVisible) {
+        //   updateAsset({
+        //     index,
+        //     newData: {
+        //       topVisible: drawerTopVisible,
+        //       bottomVisible: drawerBottomVisible,
+        //     },
+        //   });
+        // }
 
         const tempMeasureInfo = {
           posX: intersects[0].object.position.x,
@@ -269,7 +269,7 @@ const DrawerComponent = React.memo(function DrawerComponent({
       }
 
       //Handle update of the DraggedAsset on dragEnd
-      const { topAsset, bottomAsset } = intersects[0].object.userData;
+      const { topAsset, bottomAsset, xIndex: currentXindex } = intersects[0].object.userData;
 
       const payload = {
         index,
@@ -277,6 +277,8 @@ const DrawerComponent = React.memo(function DrawerComponent({
           xIndex: intersects[0].object.userData.xIndex,
           topAsset: topAsset, //update topAsset
           bottomAsset: bottomAsset, //update bottomAsset
+          topVisible: result.topVisible, //update topVisible
+          bottomVisible: result.bottomVisible, //update bottomVisible
           inDivider: intersects[0].object.userData.inDivider,
           d_xIndex: intersects[0].object.userData.d_xIndex,
           d_yPos: intersects[0].object.userData.d_yPos,
@@ -289,6 +291,9 @@ const DrawerComponent = React.memo(function DrawerComponent({
 
       updateAsset(payload);
 
+      /***************** Function Logic: What Happens When topConnected or bottomConnected Is True (Indicating It Is Connected to Another Drawer) **********************************************************/
+
+      // Handles removal of the bottom of the topAsset if it's connected with another Drawer
       if (result.topConnected && type === Config.furnishing.type.drawer) {
         // Find the closest asset above `result.posY` directly
         let topAsset = null;
@@ -297,7 +302,7 @@ const DrawerComponent = React.memo(function DrawerComponent({
         for (let i = 0; i < furnishingAssets.length; i++) {
           const currentAsset = furnishingAssets[i];
           if (
-            currentAsset.xIndex === xIndex &&
+            currentAsset.xIndex === currentXindex &&
             currentAsset.position[1] > result.posY &&
             (!topAsset || currentAsset.position[1] < topAsset.position[1])
           ) {
@@ -316,6 +321,7 @@ const DrawerComponent = React.memo(function DrawerComponent({
         }
       }
 
+      // Handles removal of the top of the topAsset if it's connected with another Drawer
       if (result.bottomConnected && type === Config.furnishing.type.drawer) {
         // Find the closest asset below `result.posY` directly
         let bottomAsset = null;
@@ -324,7 +330,7 @@ const DrawerComponent = React.memo(function DrawerComponent({
         for (let i = 0; i < furnishingAssets.length; i++) {
           const currentAsset = furnishingAssets[i];
           if (
-            currentAsset.xIndex === xIndex &&
+            currentAsset.xIndex === currentXindex &&
             currentAsset.position[1] < result.posY &&
             (!bottomAsset || currentAsset.position[1] > bottomAsset.position[1])
           ) {
@@ -341,6 +347,66 @@ const DrawerComponent = React.memo(function DrawerComponent({
             },
           });
         }
+      }
+
+      /****************************************************************************************/
+
+      /***************** Function Logic: What Happens When topConnected or bottomConnected Is just becomes false (Indicating It Is Connected to Another Drawer) **********************************************************/
+      // Updates the bottomVisible property of the top drawer it was connected to when it is no longer topConnected.
+      if (!asset.topVisible && position[1] !== ref.current.position[1] && asset.type === "Drawer") {
+        const filteredAssets = furnishingAssets.filter((asset) => {
+          return asset.xIndex === xIndex && asset.position[1] > position[1];
+        });
+
+        //if it's topConnected with the top Plate
+        if (!filteredAssets.length) return;
+
+        const sortAssets = filteredAssets.sort((a, b) => {
+          return a.position[1] - b.position[1];
+        });
+        const topAsset = sortAssets[0];
+
+        const assetIndex = furnishingAssets.findIndex(
+          (asset) => asset.position[1] === topAsset.position[1]
+        );
+
+        updateAsset({
+          index: assetIndex,
+          newData: {
+            bottomVisible: true,
+          },
+        });
+      }
+
+      //Updates the topVisible property of the bottom drawer it was connected to when it is no longer bottomConnected.
+      if (
+        !asset.bottomVisible &&
+        position[1] !== ref.current.position[1] &&
+        asset.type === "Drawer"
+      ) {
+        const filteredAssets = furnishingAssets.filter((asset) => {
+          return asset.xIndex === xIndex && asset.position[1] < position[1];
+        });
+
+        //if it's bottomConnected with the bottom Plate
+        if (!filteredAssets.length) return;
+
+        const sortAssets = filteredAssets.sort((a, b) => {
+          return b.position[1] - a.position[1];
+        });
+
+        const topAsset = sortAssets[0];
+
+        const assetIndex = furnishingAssets.findIndex(
+          (asset) => asset.position[1] === topAsset.position[1]
+        );
+
+        updateAsset({
+          index: assetIndex,
+          newData: {
+            topVisible: true,
+          },
+        });
       }
     },
     [ref, scale, topShelfDistance, xIndex, position, furnishingAssets]
