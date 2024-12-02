@@ -6,6 +6,7 @@ import { getOuterDrawerScale } from "../../utils/getInfo";
 import Plate from "./Plate";
 import useDimensionStore from "../../zustand/dimensionStore";
 import useFurnishingStore from "../../zustand/furnishingStore";
+import useDndStore from "../../zustand/dndStore";
 const drawerConfig = Config.furnishing.drawer;
 
 const Drawer = React.memo(function Drawer(props) {
@@ -44,6 +45,8 @@ const Drawer = React.memo(function Drawer(props) {
       bottomAsset
     );
   }, [scale, depth, elementIndex, topShelfDistance, korpusType, position, height]);
+
+  const frontplateVisible = useDndStore.use.frontplateVisible();
 
   const positionX = (korpusType) => {
     let positionX = 0;
@@ -178,6 +181,7 @@ const Drawer = React.memo(function Drawer(props) {
           ]}
           type={Config.plate.type.back}
           category={Config.color.category.front}
+          visible={frontplateVisible}
         />
       );
     }
@@ -310,6 +314,7 @@ const Drawer = React.memo(function Drawer(props) {
           ]}
           type={Config.plate.type.back}
           category={Config.color.category.front}
+          visible={frontplateVisible}
         />
       )}
 

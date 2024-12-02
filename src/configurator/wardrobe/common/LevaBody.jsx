@@ -2,14 +2,12 @@ import { useState, useEffect } from "react";
 import { folder, Leva, useControls } from "leva";
 import useColorStore from "../zustand/colorStore";
 
-
-export default function LevaBody({type}) { 
-
+export default function LevaBody({ type }) {
   const bodyTexture = useColorStore.use.bodyTexture();
   const setBodyTexture = useColorStore.use.setBodyTexture();
   const frontTexture = useColorStore.use.frontTexture();
   const setFrontTexture = useColorStore.use.setFrontTexture();
-  
+
   const {
     map,
     normalMap,
@@ -41,7 +39,7 @@ export default function LevaBody({type}) {
     reflectf,
     specularf,
     iorsf,
-    clearCoatf
+    clearCoatf,
   } = useControls({
     BodyTexture: folder(
       {
@@ -51,19 +49,19 @@ export default function LevaBody({type}) {
         },
         normalMap: {
           value: null, // Initial value can be a URL or null
-          image: bodyTexture.normalMap
+          image: bodyTexture.normalMap,
         },
         aoMap: {
-          value: null, // Initial value can be a URL or null  
-          image: bodyTexture.aoMap
+          value: null, // Initial value can be a URL or null
+          image: bodyTexture.aoMap,
         },
         metalnessMap: {
-          value: null, // Initial value can be a URL or null  
-          image: bodyTexture.metalnessMap
+          value: null, // Initial value can be a URL or null
+          image: bodyTexture.metalnessMap,
         },
         roughnessMap: {
-          value: null, // Initial value can be a URL or null  
-          image: bodyTexture.roughnessMap
+          value: null, // Initial value can be a URL or null
+          image: bodyTexture.roughnessMap,
         },
         rough: { value: bodyTexture.property.roughness, min: 0, max: 1 },
         metal: { value: bodyTexture.property.metalness, min: 0, max: 1 },
@@ -86,19 +84,19 @@ export default function LevaBody({type}) {
         },
         normalMapf: {
           value: null, // Initial value can be a URL or null
-          image: frontTexture.normalMap
+          image: frontTexture.normalMap,
         },
         aoMapf: {
-          value: null, // Initial value can be a URL or null  
-          image: frontTexture.aoMap
+          value: null, // Initial value can be a URL or null
+          image: frontTexture.aoMap,
         },
         metalnessMapf: {
-          value: null, // Initial value can be a URL or null  
-          image: frontTexture.metalnessMap
+          value: null, // Initial value can be a URL or null
+          image: frontTexture.metalnessMap,
         },
         roughnessMapf: {
-          value: null, // Initial value can be a URL or null  
-          image: frontTexture.roughnessMap
+          value: null, // Initial value can be a URL or null
+          image: frontTexture.roughnessMap,
         },
         roughf: { value: frontTexture.property.roughness, min: 0, max: 1 },
         metalf: { value: frontTexture.property.metalness, min: 0, max: 1 },
@@ -137,7 +135,7 @@ export default function LevaBody({type}) {
         reflectivity: reflect,
         specularIntensity: specular,
         envMapIntensity: envIntensity,
-        clearcoat: clearCoat
+        clearcoat: clearCoat,
       },
     });
 
@@ -162,10 +160,9 @@ export default function LevaBody({type}) {
         reflectivity: reflectf,
         specularIntensity: specularf,
         envMapIntensity: envIntensityf,
-        clearcoat: clearCoatf
+        clearcoat: clearCoatf,
       },
     });
-
   }, [
     map,
     normalMap,
@@ -197,12 +194,8 @@ export default function LevaBody({type}) {
     reflectf,
     specularf,
     iorsf,
-    clearCoatf
+    clearCoatf,
   ]);
 
-  
-  return (
-    <Leva />
-  )
+  return <Leva />;
 }
-

@@ -14,6 +14,7 @@ const useDndStoreBase = create((set) => ({
 
   assetDragging: false,
   productDragging: false,
+  frontplateVisible: true,
 
   currentIndex: null,
   setCurrentIndex: (currentIndex) => set({ currentIndex }),
@@ -26,7 +27,8 @@ const useDndStoreBase = create((set) => ({
   setFlapType: (flap_type) => set({ flap_type }),
   setDoorCategory: (door_category) => set({ door_category }),
   setAssetDragging: (assetDragging) => set({ assetDragging }),
-  setDrawerType: (drawerType) => set({ drawerType })
+  setDrawerType: (drawerType) => set({ drawerType }),
+  setFrontPlateVisible: (frontplateVisible) => set({frontplateVisible})
 }))
 
 const useDndStore = createSelectors(useDndStoreBase);

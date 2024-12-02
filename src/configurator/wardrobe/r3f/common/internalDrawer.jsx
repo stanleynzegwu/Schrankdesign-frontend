@@ -1,20 +1,20 @@
-import React, { useMemo } from "react"
+import React, { useMemo } from "react";
 
-import DrawerBody from "./drawerBody"
-import Config from "../../../config"
-import { getInternalDrawerScale } from "../../utils/getInfo"
-import Plate from "./Plate"
-
-const internalDrawerConfig = Config.furnishing.internalDrawer
+import DrawerBody from "./drawerBody";
+import Config from "../../../config";
+import { getInternalDrawerScale } from "../../utils/getInfo";
+import Plate from "./Plate";
+import useDndStore from "../../zustand/dndStore";
+const internalDrawerConfig = Config.furnishing.internalDrawer;
 
 const InternalDrawr = React.memo(function InternalDrawer(props) {
-  const { scale, depth, visible, topVisible, bottomVisible, sideVisible } =
-    props
+  const { scale, depth, visible, topVisible, bottomVisible, sideVisible } = props;
 
   const internalDrawerScale = useMemo(() => {
-    return getInternalDrawerScale(scale, depth)
-  }, [scale, depth])
+    return getInternalDrawerScale(scale, depth);
+  }, [scale, depth]);
 
+  const frontplateVisible = useDndStore.use.frontplateVisible();
   return (
     // eslint-disable-next-line react/no-unknown-property
     <group visible={visible}>
@@ -24,9 +24,7 @@ const InternalDrawr = React.memo(function InternalDrawer(props) {
       <Plate
         args={internalDrawerScale.side}
         position={[
-          scale[0] / 2 +
-            internalDrawerConfig.panelSpace +
-            internalDrawerConfig.panelWidth / 2,
+          scale[0] / 2 + internalDrawerConfig.panelSpace + internalDrawerConfig.panelWidth / 2,
           -internalDrawerConfig.bottomShelfDistance / 2,
           scale[2] / 2 +
             Config.plate.thickness -
@@ -45,9 +43,7 @@ const InternalDrawr = React.memo(function InternalDrawer(props) {
       <Plate
         args={internalDrawerScale.side}
         position={[
-          -scale[0] / 2 -
-            internalDrawerConfig.panelSpace -
-            internalDrawerConfig.panelWidth / 2,
+          -scale[0] / 2 - internalDrawerConfig.panelSpace - internalDrawerConfig.panelWidth / 2,
           -internalDrawerConfig.bottomShelfDistance / 2,
           scale[2] / 2 +
             Config.plate.thickness -
@@ -67,9 +63,7 @@ const InternalDrawr = React.memo(function InternalDrawer(props) {
         args={internalDrawerScale.top}
         position={[
           0,
-          scale[1] / 2 +
-            internalDrawerConfig.topShelfDistance +
-            Config.plate.thickness / 2,
+          scale[1] / 2 + internalDrawerConfig.topShelfDistance + Config.plate.thickness / 2,
           scale[2] / 2 +
             Config.plate.thickness -
             (depth -
@@ -88,9 +82,7 @@ const InternalDrawr = React.memo(function InternalDrawer(props) {
         args={internalDrawerScale.bottom}
         position={[
           0,
-          -scale[1] / 2 -
-            internalDrawerConfig.bottomShelfDistance -
-            Config.plate.thickness / 2,
+          -scale[1] / 2 - internalDrawerConfig.bottomShelfDistance - Config.plate.thickness / 2,
           scale[2] / 2 +
             Config.plate.thickness -
             (depth -
@@ -109,17 +101,15 @@ const InternalDrawr = React.memo(function InternalDrawer(props) {
         args={internalDrawerScale.front}
         position={[
           0,
-          -(
-            internalDrawerConfig.bottomShelfDistance -
-            internalDrawerConfig.frontSpace
-          ) / 2,
+          -(internalDrawerConfig.bottomShelfDistance - internalDrawerConfig.frontSpace) / 2,
           scale[2] / 2 + Config.plate.thickness / 2,
         ]}
         type={Config.plate.type.back}
+        visible={frontplateVisible}
         category={Config.color.category.body}
       />
     </group>
-  )
-})
+  );
+});
 
-export default InternalDrawr
+export default InternalDrawr;
