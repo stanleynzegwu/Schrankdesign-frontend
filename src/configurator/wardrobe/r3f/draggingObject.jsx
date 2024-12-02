@@ -18,11 +18,7 @@ import DimensionLine from "./common/dimensionLine";
 import Door from "./common/door";
 import Flap from "./common/flap";
 import { Griff } from "./common/griff";
-import {
-  getDefaultScale,
-  getDraggingInfo,
-  getPosZAvailable,
-} from "../utils/draggingInfo";
+import { getDefaultScale, getDraggingInfo, getPosZAvailable } from "../utils/draggingInfo";
 import { getBottom, getTop } from "../utils/availableSpace";
 import useDndStore from "../zustand/dndStore";
 import useDimensionStore from "../zustand/dimensionStore";
@@ -41,11 +37,10 @@ let bottomConnected = false;
 let topAssetType = "none";
 
 const DraggingObject = React.memo(function DraggingObject({ spaceRef }) {
-
   const pointer = useMemo(() => new THREE.Vector2(), []);
 
-  const totalSpace = useFurnishingStore.use.totalSpace()
-  const furnishingAssets = useFurnishingStore.use.furnishingAssets()
+  const totalSpace = useFurnishingStore.use.totalSpace();
+  const furnishingAssets = useFurnishingStore.use.furnishingAssets();
 
   const productDragging = useDndStore.use.productDragging();
   const type = useDndStore.use.type();
@@ -70,7 +65,7 @@ const DraggingObject = React.memo(function DraggingObject({ spaceRef }) {
   const withOutFeet = useDimensionStore.use.withOutFeet();
   const hanging = useDimensionStore.use.hanging();
 
-  const removeAsset = useFurnishingStore.use.removeAsset()
+  const updateAsset = useFurnishingStore.use.updateAsset();
 
   const { size, camera, raycaster } = useThree();
 
@@ -95,8 +90,7 @@ const DraggingObject = React.memo(function DraggingObject({ spaceRef }) {
   // raster for dragging object
   const raster = useMemo(
     () =>
-      type == Config.furnishing.type.shelf ||
-      type == Config.furnishing.type.glassBottom
+      type == Config.furnishing.type.shelf || type == Config.furnishing.type.glassBottom
         ? Config.furnishing.shelf.raster
         : Config.furnishing.default.raster,
     [type]
@@ -147,15 +141,8 @@ const DraggingObject = React.memo(function DraggingObject({ spaceRef }) {
       intersects = raycaster.intersectObjects(spaceRef?.children, true);
       if (!intersects[0]) return;
       if (intersects[0].object.name === "available") {
-        const {
-          xIndex,
-          top,
-          bottom,
-          topAsset,
-          bottomAsset,
-          availableTop,
-          availableBottom,
-        } = intersects[0].object.userData;
+        const { xIndex, top, bottom, topAsset, bottomAsset, availableTop, availableBottom } =
+          intersects[0].object.userData;
 
         setTop_asset(topAsset);
         setBottom_asset(bottomAsset);
@@ -216,7 +203,7 @@ const DraggingObject = React.memo(function DraggingObject({ spaceRef }) {
               defaultScale[2],
             ]);
           }
-        }  else {
+        } else {
           const result = getDraggingInfo({
             type,
             top,
@@ -234,11 +221,7 @@ const DraggingObject = React.memo(function DraggingObject({ spaceRef }) {
           topConnected = result.topConnected;
           bottomConnected = result.bottomConnected;
 
-          objectRef.current?.position.set(
-            intersects[0].object.position.x,
-            result.posY,
-            posZ
-          );
+          objectRef.current?.position.set(intersects[0].object.position.x, result.posY, posZ);
 
           if (
             scale[0] !== result.objectWidth ||
@@ -263,7 +246,8 @@ const DraggingObject = React.memo(function DraggingObject({ spaceRef }) {
             belowBottom: availableBottom,
           };
 
-          if (JSON.stringify(measureInfo) !== JSON.stringify(tempMeasureInfo)) setMeasureInfo(tempMeasureInfo);
+          if (JSON.stringify(measureInfo) !== JSON.stringify(tempMeasureInfo))
+            setMeasureInfo(tempMeasureInfo);
         }
       } else {
         if (
@@ -286,15 +270,7 @@ const DraggingObject = React.memo(function DraggingObject({ spaceRef }) {
         setShowMeasure(false);
       }
     },
-    [
-      objectRef,
-      spaceRef,
-      defaultScale,
-      scale,
-      measureInfo,
-      door_type,
-      flap_type,
-    ]
+    [objectRef, spaceRef, defaultScale, scale, measureInfo, door_type, flap_type]
   );
 
   useEffect(() => {
@@ -315,18 +291,16 @@ const DraggingObject = React.memo(function DraggingObject({ spaceRef }) {
           };
 
           addLed(payload.asset);
-
         } else if (type === Config.furnishing.type.door) {
-
           const space = totalSpace.find(
             (item) =>
               item.xIndex === intersects[0].object.userData.xIndex &&
               item.availableBottom <= objectRef.current?.position.y &&
               item.availableTop >= objectRef.current?.position.y
-          )
-      
+          );
+
           if (!space) return;
-      
+
           const filterAndSortAssets = (item) =>
             !item.inDivider &&
             item.xIndex === intersects[0].object.userData.xIndex &&
@@ -336,11 +310,11 @@ const DraggingObject = React.memo(function DraggingObject({ spaceRef }) {
               Config.furnishing.type.shelf,
               Config.furnishing.type.foldBottom,
               Config.furnishing.type.pantsPullout,
-            ].includes(item.type)
-      
+            ].includes(item.type);
+
           const filteredAssets = furnishingAssets
             .filter(filterAndSortAssets)
-            .sort((a, b) => a.position[1] - b.position[1])
+            .sort((a, b) => a.position[1] - b.position[1]);
 
           payload.asset = {
             xIndex: intersects[0].object.userData.xIndex,
@@ -360,10 +334,10 @@ const DraggingObject = React.memo(function DraggingObject({ spaceRef }) {
             isShowControl: true,
             isPlint: (hanging && !withOutFeet) || (!hanging && withOutFeet),
             innerAssetsTopIndex: filteredAssets.length > 0 ? filteredAssets.length : undefined,
-            innerAssetsBottomIndex: filteredAssets.length > 0 ? 0 : undefined
+            innerAssetsBottomIndex: filteredAssets.length > 0 ? 0 : undefined,
           };
-          
-          console.log('dragObject', payload.asset)
+
+          console.log("dragObject", payload.asset);
 
           if (pushOpen) {
             addDoor(payload);
@@ -404,19 +378,21 @@ const DraggingObject = React.memo(function DraggingObject({ spaceRef }) {
             bottomAsset: bottom_asset,
             elementIndex: elementIndex,
             isShowControl: true,
-            isPlint: (hanging && !withOutFeet) || (!hanging && withOutFeet)
+            isPlint: (hanging && !withOutFeet) || (!hanging && withOutFeet),
           };
           if (pushOpen) {
             addDoor(payload);
           }
-          if ((scale[1] <= Config.door.flap_height_range.max &&
-            scale[1] >= Config.door.flap_height_range.min) && 
-            (scale[0] <= Config.door.flap_width_range.max &&
-              scale[0] >= Config.door.flap_width_range.min) && !pushOpen
-           ) {
-            addDoor(payload)
-           }
-           payload.asset = {
+          if (
+            scale[1] <= Config.door.flap_height_range.max &&
+            scale[1] >= Config.door.flap_height_range.min &&
+            scale[0] <= Config.door.flap_width_range.max &&
+            scale[0] >= Config.door.flap_width_range.min &&
+            !pushOpen
+          ) {
+            addDoor(payload);
+          }
+          payload.asset = {
             xIndex: intersects[0].object.userData.xIndex,
             scale,
             position: [
@@ -429,149 +405,156 @@ const DraggingObject = React.memo(function DraggingObject({ spaceRef }) {
             elementIndex: elementIndex,
             isShowControl: true,
           };
-          if ((scale[1] <= Config.door.flap_height_range.max &&
-            scale[1] >= Config.door.flap_height_range.min) && 
-            (scale[0] <= Config.door.flap_width_range.max &&
-              scale[0] >= Config.door.flap_width_range.min) && !pushOpen
-           ) {
-            addGriff(payload)
-           }
+          if (
+            scale[1] <= Config.door.flap_height_range.max &&
+            scale[1] >= Config.door.flap_height_range.min &&
+            scale[0] <= Config.door.flap_width_range.max &&
+            scale[0] >= Config.door.flap_width_range.min &&
+            !pushOpen
+          ) {
+            addGriff(payload);
+          }
         } else {
-          let drawerScale = scale
+          let drawerScale = scale;
           let drawerPosition = [
             objectRef.current?.position.x,
             objectRef.current?.position.y,
             objectRef.current?.position.z,
-          ]
-          let tempDrawerGroupScale = [scale[1]]
+          ];
+          let tempDrawerGroupScale = [scale[1]];
           // let tempDrawerGroupScale = initialDrawerGroupScale
-          let tempDrawerGroup = 1
-          let drawerTopVisible = topVisible
-          let drawerBottomVisible = bottomVisible
-          const payload = {}
+          let tempDrawerGroup = 1;
+          let drawerTopVisible = topVisible;
+          let drawerBottomVisible = bottomVisible;
+          const payload = {};
           if (type === Config.furnishing.type.drawer) {
-            if(!topVisible) {
-              const filteredAssets = furnishingAssets.filter((asset) => {
-                return asset.xIndex === intersects[0].object.userData.xIndex &&
-                  asset.position[1] > objectRef.current.position.y
-              })
-              const sortAssets = filteredAssets.sort((a, b) => {
-                return a.position[1] - b.position[1]
-              })
-              const topAsset = sortAssets[0]
+            /************** Handles removal of the bottom of the topAsset if it's connected with another Drawer ***********/
+            if (!topVisible) {
+              // Find the closest asset above `result.posY` directly
+              let topAsset = null;
+              let assetIndex = -1;
+
+              for (let i = 0; i < furnishingAssets.length; i++) {
+                const currentAsset = furnishingAssets[i];
+                if (
+                  currentAsset.xIndex === intersects[0].object.userData.xIndex &&
+                  currentAsset.position[1] > objectRef.current.position.y &&
+                  (!topAsset || currentAsset.position[1] < topAsset.position[1])
+                ) {
+                  topAsset = currentAsset;
+                  assetIndex = i;
+                }
+              }
+
               if (topAsset && topAsset?.type === Config.furnishing.type.drawer) {
-                drawerTopVisible = topAsset.topVisible
-                drawerBottomVisible = topAsset.bottomVisible
-                tempDrawerGroup = topAsset.drawerGroup + 1
-                topAsset.drawerGroupScale.map((asset) => {
-                  tempDrawerGroupScale.push(asset)
-                })
-                drawerScale = [
-                  scale[0],
-                  scale[1] 
-                    + topAsset?.scale[1] + 0.475
-                    + Config.furnishing.drawer.bottomShelfDistance 
-                    + Config.furnishing.shelf.thickness1,
-                  scale[2],
-                ]
-                drawerPosition = [
-                  objectRef.current.position.x,
-                  objectRef.current.position.y + drawerScale[1]/2 - scale[1]/2,
-                  objectRef.current.position.z,
-                ]
-                removeAsset({ xIndex: intersects[0].object.userData.xIndex, yPos: topAsset.position[1] })
+                updateAsset({
+                  index: assetIndex,
+                  newData: {
+                    bottomVisible: false,
+                  },
+                });
               }
             }
-            if(!bottomVisible) {
-              const filteredAssets = furnishingAssets.filter((asset) => {
-                return asset.xIndex === intersects[0].object.userData.xIndex &&
-                  asset.position[1] < objectRef.current.position.y
-              })
-              const sortAssets = filteredAssets.sort((a, b) => {
-                return b.position[1] - a.position[1]
-              })
-              const topAsset = sortAssets[0]
-              if (topAsset && topAsset?.type === Config.furnishing.type.drawer) {
-                drawerTopVisible = topAsset.topVisible
-                drawerBottomVisible = topAsset.bottomVisible
-                tempDrawerGroup = topAsset.drawerGroup + 1
-                topAsset.drawerGroupScale.map((asset) => {
-                  tempDrawerGroupScale.unshift(asset)
-                })
-                drawerScale = [
-                  scale[0],
-                  scale[1] 
-                    + topAsset?.scale[1] 
-                    + Config.furnishing.drawer.topShelfDistance 
-                    + Config.furnishing.drawer.bottomShelfDistance 
-                    + Config.furnishing.shelf.thickness1,
-                  scale[2],
-                ]
-                drawerPosition = [
-                  objectRef.current.position.x,
-                  objectRef.current.position.y - drawerScale[1]/2 + scale[1]/2,
-                  objectRef.current.position.z,
-                ]
-                removeAsset({ xIndex: intersects[0].object.userData.xIndex, yPos: topAsset.position[1] })
+
+            /****************** Handles removal of the top of the topAsset if it's connected with another Drawer ***********/
+            if (!bottomVisible) {
+              // Find the closest asset below `result.posY` directly
+              let bottomAsset = null;
+              let assetIndex = -1;
+
+              for (let i = 0; i < furnishingAssets.length; i++) {
+                const currentAsset = furnishingAssets[i];
+                if (
+                  currentAsset.xIndex === intersects[0].object.userData.xIndex &&
+                  currentAsset.position[1] < objectRef.current.position.y &&
+                  (!bottomAsset || currentAsset.position[1] > bottomAsset.position[1])
+                ) {
+                  bottomAsset = currentAsset;
+                  assetIndex = i;
+                }
+              }
+
+              if (bottomAsset && bottomAsset?.type === Config.furnishing.type.drawer) {
+                updateAsset({
+                  index: assetIndex,
+                  newData: {
+                    topVisible: false,
+                  },
+                });
               }
             }
           }
+          /**** */
+          /**** */
+          /**** */
           if (type === Config.furnishing.type.internalDrawer) {
             if (topConnected) {
-              const filteredAssets = furnishingAssets.filter((asset) => {
-                return asset.xIndex === intersects[0].object.userData.xIndex &&
-                  asset.position[1] > objectRef.current.position.y
-              })
-              const sortAssets = filteredAssets.sort((a, b) => {
-                return a.position[1] - b.position[1]
-              })
-              const topAsset = sortAssets[0]
-              if (topAsset  && topAsset?.type === Config.furnishing.type.internalDrawer) {
-                drawerScale = [
-                  scale[0],
-                  scale[1] 
-                    + topAsset.scale[1]  
-                    + Config.furnishing.internalDrawer.topShelfDistance 
-                    + Config.furnishing.internalDrawer.panelSpace,
-                  scale[2],
-                ]
-                drawerPosition = [
-                  objectRef.current.position.x,
-                  objectRef.current.position.y + drawerScale[1]/2 - scale[1]/2,
-                  objectRef.current.position.z,
-                ]
-                removeAsset({ xIndex: intersects[0].object.userData.xIndex, yPos: topAsset.position[1] })
+              let topAsset = null;
+              let assetIndex = -1;
+
+              for (let i = 0; i < furnishingAssets.length; i++) {
+                const currentAsset = furnishingAssets[i];
+                if (
+                  currentAsset.xIndex === intersects[0].object.userData.xIndex &&
+                  currentAsset.position[1] > objectRef.current.position.y &&
+                  (!topAsset || currentAsset.position[1] < topAsset.position[1])
+                ) {
+                  topAsset = currentAsset;
+                  assetIndex = i;
+                }
+              }
+
+              if (topAsset && topAsset?.type === Config.furnishing.type.internalDrawer) {
+                updateAsset({
+                  index: assetIndex,
+                  newData: {
+                    bottomVisible: false,
+                  },
+                });
               }
             }
 
             if (bottomConnected) {
-              const filteredAssets = furnishingAssets.filter((asset) => {
-                return asset.xIndex === intersects[0].object.userData.xIndex &&
-                  asset.position[1] < objectRef.current.position.y
-              })
-              const sortAssets = filteredAssets.sort((a, b) => {
-                return b.position[1] - a.position[1]
-              })
-              const topAsset = sortAssets[0]
-              if (topAsset && topAsset?.type === Config.furnishing.type.internalDrawer) {
-                drawerScale = [
-                  scale[0],
-                  scale[1] 
-                    + topAsset.scale[1] 
-                    + Config.furnishing.internalDrawer.topShelfDistance 
-                    + Config.furnishing.internalDrawer.panelSpace,
-                  scale[2],
-                ]
-                drawerPosition = [
-                  objectRef.current.position.x,
-                  objectRef.current.position.y - drawerScale[1]/2 + scale[1]/2,
-                  objectRef.current.position.z,
-                ]
-                removeAsset({ xIndex: intersects[0].object.userData.xIndex, yPos: topAsset.position[1] })
-              } 
+              let bottomAsset = null;
+              let assetIndex = -1;
+
+              for (let i = 0; i < furnishingAssets.length; i++) {
+                const currentAsset = furnishingAssets[i];
+                if (
+                  currentAsset.xIndex === intersects[0].object.userData.xIndex &&
+                  currentAsset.position[1] < objectRef.current.position.y &&
+                  (!bottomAsset || currentAsset.position[1] > bottomAsset.position[1])
+                ) {
+                  bottomAsset = currentAsset;
+                  assetIndex = i;
+                }
+              }
+
+              if (bottomAsset && bottomAsset?.type === Config.furnishing.type.internalDrawer) {
+                updateAsset({
+                  index: assetIndex,
+                  newData: {
+                    topVisible: false,
+                  },
+                });
+              }
             }
           }
-          
+
+          //Get value of topVisible and bottomVisible
+          const topVisibleValue =
+            (topConnected && intersects[0].object.userData.topAsset === type) ||
+            (topConnected && intersects[0].object.userData.topAsset === "none") ||
+            (!topVisible && intersects[0].object.userData.topAsset === "none")
+              ? false
+              : true;
+          const bottomVisibleValue =
+            (bottomConnected && intersects[0].object.userData.bottomAsset === type) ||
+            (bottomConnected && intersects[0].object.userData.bottomAsset === "none") ||
+            (!bottomVisible && intersects[0].object.userData.bottomAsset === "none")
+              ? false
+              : true;
+
           payload.asset = {
             xIndex: intersects[0].object.userData.xIndex,
             inDivider: intersects[0].object.userData.inDivider,
@@ -583,8 +566,8 @@ const DraggingObject = React.memo(function DraggingObject({ spaceRef }) {
             type,
             topAsset: top_asset,
             bottomAsset: bottom_asset,
-            topVisible: drawerTopVisible,
-            bottomVisible: drawerBottomVisible,
+            topVisible: topVisibleValue,
+            bottomVisible: bottomVisibleValue,
             sideVisible: true,
             drawerGroup: tempDrawerGroup,
             drawerGroupScale: tempDrawerGroupScale,
@@ -604,7 +587,11 @@ const DraggingObject = React.memo(function DraggingObject({ spaceRef }) {
               type === Config.furnishing.type.divider
                 ? (scale[0] - Config.furnishing.divider.thickness) / 2
                 : undefined,
-            drawerType: type === Config.furnishing.type.drawer || type === Config.furnishing.type.internalDrawer ? drawerType : undefined
+            drawerType:
+              type === Config.furnishing.type.drawer ||
+              type === Config.furnishing.type.internalDrawer
+                ? drawerType
+                : undefined,
           };
 
           payload.drawerShelf = [];
@@ -612,13 +599,13 @@ const DraggingObject = React.memo(function DraggingObject({ spaceRef }) {
             payload.drawerShelf.push({
               location: "top",
               bottomVisible: !topConnected,
-            })
+            });
           }
           if (bottomConnected) {
             payload.drawerShelf.push({
               location: "bottom",
               topVisible: !bottomConnected,
-            })
+            });
           }
 
           addAsset(payload);
@@ -650,8 +637,7 @@ const DraggingObject = React.memo(function DraggingObject({ spaceRef }) {
         <Plate
           args={scale}
           visible={
-            type === Config.furnishing.type.shelf ||
-            type === Config.furnishing.type.foldBottom
+            type === Config.furnishing.type.shelf || type === Config.furnishing.type.foldBottom
           }
           type={Config.plate.type.floor}
         />
@@ -671,7 +657,7 @@ const DraggingObject = React.memo(function DraggingObject({ spaceRef }) {
           topVisible={true}
           bottomVisible={true}
           topShelfDistance={Config.furnishing.drawer.topShelfDistance}
-          drawerGroup={1} 
+          drawerGroup={1}
           drawerGroupScale={[scale[1]]}
           drag={true}
         />
@@ -696,25 +682,13 @@ const DraggingObject = React.memo(function DraggingObject({ spaceRef }) {
           bottomVisible={true}
         />
 
-        <ClothesRail
-          width={scale[0]}
-          visible={type === Config.furnishing.type.clothesRail}
-        />
+        <ClothesRail width={scale[0]} visible={type === Config.furnishing.type.clothesRail} />
 
-        <ClothesLift
-          width={scale[0]}
-          visible={type === Config.furnishing.type.clothesLift}
-        />
+        <ClothesLift width={scale[0]} visible={type === Config.furnishing.type.clothesLift} />
 
-        <PantsPullout
-          scale={scale}
-          visible={type === Config.furnishing.type.pantsPullout}
-        />
+        <PantsPullout scale={scale} visible={type === Config.furnishing.type.pantsPullout} />
 
-        <LedLighting
-          scale={scale}
-          visible={type === Config.furnishing.type.ledLighting}
-        />
+        <LedLighting scale={scale} visible={type === Config.furnishing.type.ledLighting} />
 
         <SlopingFloor
           width={scale[0]}
@@ -750,11 +724,7 @@ const DraggingObject = React.memo(function DraggingObject({ spaceRef }) {
           door_category={door_category}
           visible={type === Config.furnishing.type.door}
         />
-        <Flap
-          scale={scale}
-          door_type={flapType}
-          visible={type === Config.furnishing.type.flap}
-        />
+        <Flap scale={scale} door_type={flapType} visible={type === Config.furnishing.type.flap} />
         <Griff
           scale={scale}
           position={[
@@ -777,11 +747,7 @@ const DraggingObject = React.memo(function DraggingObject({ spaceRef }) {
             ]}
             endDir="X"
             value={parseInt(measureInfo.aboveTop - measureInfo.aboveBottom)}
-            center={[
-              measureInfo.posX,
-              (measureInfo.aboveTop + measureInfo.aboveBottom) / 2,
-              depth,
-            ]}
+            center={[measureInfo.posX, (measureInfo.aboveTop + measureInfo.aboveBottom) / 2, depth]}
             lineWidth={1.8}
             isBig={false}
           />
@@ -792,11 +758,7 @@ const DraggingObject = React.memo(function DraggingObject({ spaceRef }) {
             ]}
             endDir="X"
             value={parseInt(measureInfo.belowTop - measureInfo.belowBottom)}
-            center={[
-              measureInfo.posX,
-              (measureInfo.belowTop + measureInfo.belowBottom) / 2,
-              depth,
-            ]}
+            center={[measureInfo.posX, (measureInfo.belowTop + measureInfo.belowBottom) / 2, depth]}
             lineWidth={1.8}
             isBig={false}
           />
