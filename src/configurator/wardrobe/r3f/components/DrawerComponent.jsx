@@ -55,6 +55,7 @@ const DrawerComponent = React.memo(function DrawerComponent({
   const viewOption = useCornerStore.use.viewOption();
 
   const furnishingAssets = useFurnishingStore.use.furnishingAssets();
+
   const addAsset = useFurnishingStore.use.addAsset();
   //const removeAsset = useFurnishingStore.use.removeAsset();
   const removeAssetByIndex = useFurnishingStore.use.removeAssetByIndex();
@@ -554,6 +555,8 @@ const DrawerComponent = React.memo(function DrawerComponent({
           });
         }
       }
+
+      document.body.style.cursor = "pointer";
     },
     [ref, scale, topShelfDistance, xIndex, position, furnishingAssets]
   );
@@ -763,64 +766,71 @@ const DrawerComponent = React.memo(function DrawerComponent({
         position[1] + scale[1] / 2 + topShelfDistance + Config.furnishing.shelf.thickness1 + 1;
       const { availableTop, aboveBottom } = getAvailableSpace(xIndex, totalSpace, flagValue);
 
-      if (drawerType !== Config.furnishing.drawer.type.customDrawer) {
-        const scaleY =
-          scale[1] +
-          initialDrawerGroupScale[0] +
-          0.475 +
-          Config.furnishing.drawer.bottomShelfDistance +
-          Config.furnishing.shelf.thickness1;
-        const positionY = position[1] - scale[1] / 2 + scaleY / 2;
+      if (scale[1] < availableTop) {
+        const payload = {};
 
-        if (initialDrawerGroupScale[0] < availableTop) {
-          let tempDrawerGroupScale = initialDrawerGroupScale;
-          tempDrawerGroupScale.push(initialDrawerGroupScale[0]);
-          updateDrawer(scaleY, positionY, tempDrawerGroupScale);
-        }
-      } else {
-        if (drawerHeightValue < availableTop) {
-          const scaleY =
-            topShelfDistance === undefined
-              ? 0
-              : 40 -
-                topShelfDistance -
-                Config.furnishing.drawer.bottomShelfDistance -
-                2 * Config.furnishing.shelf.thickness1;
+        payload.asset = {
+          xIndex,
+          inDivider,
+          d_xIndex,
+          d_yPos,
+          position: [
+            position[0],
+            position[1] +
+              scale[1] / 2 +
+              scale[1] / 2 +
+              Config.furnishing.drawer.bottomShelfDistance +
+              Config.furnishing.shelf.thickness1 +
+              0.475,
+            position[2],
+          ],
+          scale: [scale[0], scale[1], scale[2]],
+          type,
+          drawerType,
+          topVisible: true,
+          bottomVisible: false,
+          sideVisible: true,
+          topShelfDistance: type === Config.furnishing.type.drawer ? topShelfDistance : undefined,
+          topShelfVisible:
+            type === Config.furnishing.type.divider &&
+            (topAssetType === Config.furnishing.type.slopingFloor ||
+              topAssetType === Config.furnishing.type.clothesLift ||
+              topAssetType === Config.furnishing.type.clothesRail ||
+              topAssetType === Config.furnishing.type.pantsPullout)
+              ? true
+              : false,
+          dividerLeftWidth:
+            type === Config.furnishing.type.divider
+              ? (scale[0] - Config.furnishing.divider.thickness) / 2
+              : undefined,
+          bottomAsset,
+          drawerGroup: initialDrawerGroup + 1,
+          drawerGroupScale: initialDrawerGroupScale,
+        };
 
-          const positionY = position[1] - scale[1] / 2 + scaleY / 2;
-          customDrawer(scaleY, positionY);
-        } else {
-          const filteredAssets = furnishingAssets.filter((asset) => {
-            return asset.xIndex === xIndex && asset.position[1] > position[1];
+        payload.drawerShelf = [];
+        if (topConnected) {
+          payload.drawerShelf.push({
+            location: "top",
+            bottomVisible: !topConnected,
           });
-          const sortAssets = filteredAssets.sort((a, b) => {
-            return a.position[1] - b.position[1];
-          });
-
-          let available = topShelfDistance;
-          if (sortAssets.length > 0) {
-            available =
-              sortAssets[0].position[1] -
-              sortAssets[0].scale[1] / 2 -
-              (position[1] + scale[1] / 2) -
-              topShelfDistance -
-              Config.furnishing.shelf.thickness1;
-          } else {
-            available = height - (position[1] + scale[1] / 2);
-          }
-
-          const scaleY =
-            topShelfDistance === undefined
-              ? 0
-              : Number(drawerHeightValue) +
-                available -
-                topShelfDistance * 2 -
-                Config.furnishing.drawer.bottomShelfDistance -
-                3 * Config.furnishing.shelf.thickness1;
-
-          const positionY = position[1] - scale[1] / 2 + scaleY / 2;
-          customDrawer(scaleY, positionY);
         }
+        if (bottomConnected) {
+          payload.drawerShelf.push({
+            location: "bottom",
+            topVisible: !bottomConnected,
+          });
+        }
+
+        addAsset(payload);
+
+        //update topVisible property of the clicked Drawer to false
+        updateAsset({
+          index,
+          newData: {
+            topVisible: false,
+          },
+        });
       }
     }
 
@@ -846,14 +856,78 @@ const DrawerComponent = React.memo(function DrawerComponent({
           Config.furnishing.internalDrawer.panelSpace;
       }
 
-      if (initialDrawerGroupScale[0] < available) {
-        const scaleY =
-          initialDrawerGroupScale[0] +
-          scale[1] +
-          Config.furnishing.internalDrawer.topShelfDistance +
-          Config.furnishing.internalDrawer.panelSpace;
-        const positionY = position[1] - scale[1] / 2 + scaleY / 2;
-        customDrawer(scaleY, positionY);
+      if (scale[1] < available) {
+        // const scaleY =
+        //   initialDrawerGroupScale[0] +
+        //   scale[1] +
+        //   Config.furnishing.internalDrawer.topShelfDistance +
+        //   Config.furnishing.internalDrawer.panelSpace;
+        // const positionY = position[1] - scale[1] / 2 + scaleY / 2;
+        // customDrawer(scaleY, positionY);
+
+        const payload = {};
+
+        payload.asset = {
+          xIndex,
+          inDivider,
+          d_xIndex,
+          d_yPos,
+          position: [
+            position[0],
+            position[1] +
+              scale[1] / 2 +
+              scale[1] / 2 +
+              Config.furnishing.drawer.bottomShelfDistance +
+              Config.furnishing.shelf.thickness1,
+            position[2],
+          ],
+          scale: [scale[0], scale[1], scale[2]],
+          type,
+          drawerType,
+          topVisible: true,
+          bottomVisible: false,
+          sideVisible: true,
+          topShelfDistance: type === Config.furnishing.type.drawer ? topShelfDistance : undefined,
+          topShelfVisible:
+            type === Config.furnishing.type.divider &&
+            (topAssetType === Config.furnishing.type.slopingFloor ||
+              topAssetType === Config.furnishing.type.clothesLift ||
+              topAssetType === Config.furnishing.type.clothesRail ||
+              topAssetType === Config.furnishing.type.pantsPullout)
+              ? true
+              : false,
+          dividerLeftWidth:
+            type === Config.furnishing.type.divider
+              ? (scale[0] - Config.furnishing.divider.thickness) / 2
+              : undefined,
+          bottomAsset,
+          drawerGroup: initialDrawerGroup + 1,
+          drawerGroupScale: initialDrawerGroupScale,
+        };
+
+        payload.drawerShelf = [];
+        if (topConnected) {
+          payload.drawerShelf.push({
+            location: "top",
+            bottomVisible: !topConnected,
+          });
+        }
+        if (bottomConnected) {
+          payload.drawerShelf.push({
+            location: "bottom",
+            topVisible: !bottomConnected,
+          });
+        }
+
+        addAsset(payload);
+
+        //update topVisible property of the clicked Drawer to false
+        updateAsset({
+          index,
+          newData: {
+            topVisible: false,
+          },
+        });
       }
     }
   }, [
