@@ -307,6 +307,7 @@ const ConfiguratorSave = React.memo(function ConfiguratorSave({ slug }) {
     griffAssets,
     width,
     height,
+    depth,
     manual,
     elementsWidths,
     elementsCount,

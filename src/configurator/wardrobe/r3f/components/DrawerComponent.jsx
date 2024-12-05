@@ -372,7 +372,6 @@ const DrawerComponent = React.memo(function DrawerComponent({
         const filteredAssets = furnishingAssets.filter((asset) => {
           return asset.xIndex === xIndex && asset.position[1] > position[1];
         });
-
         //if it's topConnected with the top Plate
         if (!filteredAssets.length) return;
 
@@ -382,7 +381,7 @@ const DrawerComponent = React.memo(function DrawerComponent({
         const topAsset = sortAssets[0];
 
         const assetIndex = furnishingAssets.findIndex(
-          (asset) => asset.position[1] === topAsset.position[1]
+          (asset) => asset.xIndex === xIndex && asset.position[1] === topAsset.position[1]
         );
         if (topAsset && topAsset?.type === Config.furnishing.type.drawer) {
           updateAsset({
@@ -414,7 +413,7 @@ const DrawerComponent = React.memo(function DrawerComponent({
         const bottomAsset = sortAssets[0];
 
         const assetIndex = furnishingAssets.findIndex(
-          (asset) => asset.position[1] === bottomAsset.position[1]
+          (asset) => asset.xIndex === xIndex && asset.position[1] === bottomAsset.position[1]
         );
 
         if (bottomAsset && bottomAsset?.type === Config.furnishing.type.drawer) {
@@ -510,7 +509,7 @@ const DrawerComponent = React.memo(function DrawerComponent({
         const topAsset = sortAssets[0];
 
         const assetIndex = furnishingAssets.findIndex(
-          (asset) => asset.position[1] === topAsset.position[1]
+          (asset) => asset.xIndex === xIndex && asset.position[1] === topAsset.position[1]
         );
 
         if (topAsset && topAsset?.type === Config.furnishing.type.internalDrawer) {
@@ -543,7 +542,7 @@ const DrawerComponent = React.memo(function DrawerComponent({
         const bottomAsset = sortAssets[0];
 
         const assetIndex = furnishingAssets.findIndex(
-          (asset) => asset.position[1] === bottomAsset.position[1]
+          (asset) => asset.xIndex === xIndex && asset.position[1] === bottomAsset.position[1]
         );
 
         if (bottomAsset && bottomAsset?.type === Config.furnishing.type.internalDrawer) {
@@ -625,6 +624,8 @@ const DrawerComponent = React.memo(function DrawerComponent({
 
   const onRemoveObject = useCallback(
     (furnishIndex) => {
+      const { topAsset, bottomAsset, xIndex: currentXindex } = intersects[0].object.userData;
+
       if (!asset.topVisible && asset.type === Config.furnishing.type.drawer) {
         const filteredAssets = furnishingAssets.filter((asset) => {
           return asset.xIndex === xIndex && asset.position[1] > position[1];
@@ -638,7 +639,7 @@ const DrawerComponent = React.memo(function DrawerComponent({
           const topAsset = sortAssets[0];
 
           const assetIndex = furnishingAssets.findIndex(
-            (asset) => asset.position[1] === topAsset.position[1]
+            (asset) => asset.xIndex === xIndex && asset.position[1] === topAsset.position[1]
           );
           if (topAsset && topAsset?.type === Config.furnishing.type.drawer) {
             updateAsset({
@@ -666,7 +667,7 @@ const DrawerComponent = React.memo(function DrawerComponent({
           const bottomAsset = sortAssets[0];
 
           const assetIndex = furnishingAssets.findIndex(
-            (asset) => asset.position[1] === bottomAsset.position[1]
+            (asset) => asset.xIndex === xIndex && asset.position[1] === bottomAsset.position[1]
           );
 
           if (bottomAsset && bottomAsset?.type === Config.furnishing.type.drawer) {
@@ -695,7 +696,7 @@ const DrawerComponent = React.memo(function DrawerComponent({
             const topAsset = sortAssets[0];
 
             const assetIndex = furnishingAssets.findIndex(
-              (asset) => asset.position[1] === topAsset.position[1]
+              (asset) => asset.xIndex === xIndex && asset.position[1] === topAsset.position[1]
             );
             if (topAsset && topAsset?.type === Config.furnishing.type.internalDrawer) {
               updateAsset({
@@ -723,7 +724,7 @@ const DrawerComponent = React.memo(function DrawerComponent({
             const bottomAsset = sortAssets[0];
 
             const assetIndex = furnishingAssets.findIndex(
-              (asset) => asset.position[1] === bottomAsset.position[1]
+              (asset) => asset.xIndex === xIndex && asset.position[1] === bottomAsset.position[1]
             );
 
             if (bottomAsset && bottomAsset?.type === Config.furnishing.type.internalDrawer) {
