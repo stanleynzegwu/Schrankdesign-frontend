@@ -623,10 +623,126 @@ const DrawerComponent = React.memo(function DrawerComponent({
     [drawerHeightValue, position]
   );
 
-  const onRemoveObject = useCallback((furnishIndex) => {
-    removeAssetByIndex(furnishIndex);
-    // setShowControl(false);
-  }, []);
+  const onRemoveObject = useCallback(
+    (furnishIndex) => {
+      if (!asset.topVisible && asset.type === Config.furnishing.type.drawer) {
+        const filteredAssets = furnishingAssets.filter((asset) => {
+          return asset.xIndex === xIndex && asset.position[1] > position[1];
+        });
+
+        //if it's topConnected with the top Plate
+        if (filteredAssets.length) {
+          const sortAssets = filteredAssets.sort((a, b) => {
+            return a.position[1] - b.position[1];
+          });
+          const topAsset = sortAssets[0];
+
+          const assetIndex = furnishingAssets.findIndex(
+            (asset) => asset.position[1] === topAsset.position[1]
+          );
+          if (topAsset && topAsset?.type === Config.furnishing.type.drawer) {
+            updateAsset({
+              index: assetIndex,
+              newData: {
+                bottomVisible: true,
+              },
+            });
+          }
+        }
+      }
+
+      //Updates the topVisible property of the bottom drawer it was connected to when it is no longer bottomConnected.
+      if (!asset.bottomVisible && asset.type === Config.furnishing.type.drawer) {
+        const filteredAssets = furnishingAssets.filter((asset) => {
+          return asset.xIndex === xIndex && asset.position[1] < position[1];
+        });
+
+        //if it's bottomConnected with the bottom Plate
+        if (filteredAssets.length) {
+          const sortAssets = filteredAssets.sort((a, b) => {
+            return b.position[1] - a.position[1];
+          });
+
+          const bottomAsset = sortAssets[0];
+
+          const assetIndex = furnishingAssets.findIndex(
+            (asset) => asset.position[1] === bottomAsset.position[1]
+          );
+
+          if (bottomAsset && bottomAsset?.type === Config.furnishing.type.drawer) {
+            updateAsset({
+              index: assetIndex,
+              newData: {
+                topVisible: true,
+              },
+            });
+          }
+        }
+      }
+
+      /************************* INTERNAL DRAWER  *************************/
+      if (asset.type === Config.furnishing.type.internalDrawer) {
+        if (!asset.topVisible) {
+          const filteredAssets = furnishingAssets.filter((asset) => {
+            return asset.xIndex === xIndex && asset.position[1] > position[1];
+          });
+
+          //if it's topConnected with the top Plate
+          if (filteredAssets.length) {
+            const sortAssets = filteredAssets.sort((a, b) => {
+              return a.position[1] - b.position[1];
+            });
+            const topAsset = sortAssets[0];
+
+            const assetIndex = furnishingAssets.findIndex(
+              (asset) => asset.position[1] === topAsset.position[1]
+            );
+            if (topAsset && topAsset?.type === Config.furnishing.type.internalDrawer) {
+              updateAsset({
+                index: assetIndex,
+                newData: {
+                  bottomVisible: true,
+                },
+              });
+            }
+          }
+        }
+
+        //Updates the topVisible property of the bottom Internaldrawer it was connected to when it is no longer bottomConnected.
+        if (!asset.bottomVisible) {
+          const filteredAssets = furnishingAssets.filter((asset) => {
+            return asset.xIndex === xIndex && asset.position[1] < position[1];
+          });
+
+          //if it's bottomConnected with the bottom Plate
+          if (filteredAssets.length) {
+            const sortAssets = filteredAssets.sort((a, b) => {
+              return b.position[1] - a.position[1];
+            });
+
+            const bottomAsset = sortAssets[0];
+
+            const assetIndex = furnishingAssets.findIndex(
+              (asset) => asset.position[1] === bottomAsset.position[1]
+            );
+
+            if (bottomAsset && bottomAsset?.type === Config.furnishing.type.internalDrawer) {
+              updateAsset({
+                index: assetIndex,
+                newData: {
+                  topVisible: true,
+                },
+              });
+            }
+          }
+        }
+      }
+
+      removeAssetByIndex(furnishIndex);
+      setShowControl(false);
+    },
+    [furnishingAssets]
+  );
 
   const getAvailableSpace = (initialXIndex, totalSpace, flagValue) => {
     const filter = totalSpace.filter((space) => {
