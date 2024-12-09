@@ -28,6 +28,9 @@ export default function Feet() {
 
   const doorAssets = useFurnishingStore.use.doorAssets();
   const updateDoor = useFurnishingStore.use.updateDoor();
+  const furnishingAssets = useFurnishingStore.use.furnishingAssets();
+  const updateAsset = useFurnishingStore.use.updateAsset();
+
   const [flag, setFlag] = useState("none");
 
   const feets = useDimensionStore.use.feets();
@@ -71,8 +74,50 @@ export default function Feet() {
       }
     });
   };
+
+  const updateDrawers = () => {
+    furnishingAssets.map((asset, index) => {
+      if (
+        asset.type === Config.furnishing.type.drawer ||
+        asset.type === Config.furnishing.type.internalDrawer
+      ) {
+        if (asset.bottomAsset === "none" && asset.bottomVisible === false) {
+          //hangend OR ohne fub
+          if (flag === true) {
+            updateAsset({
+              index,
+              newData: {
+                position: [
+                  asset.position[0],
+                  asset.position[1] - Config.plate.plinthHeight,
+                  asset.position[2],
+                ],
+              },
+            });
+          }
+          //Mib Fub tab
+          if (flag === false) {
+            updateAsset({
+              index,
+              newData: {
+                position: [
+                  asset.position[0],
+                  asset.position[1] + Config.plate.plinthHeight,
+                  asset.position[2],
+                ],
+              },
+            });
+          }
+        }
+      }
+    });
+  };
+
   useEffect(() => {
-    if (flag !== "none") updateDoors();
+    if (flag !== "none") {
+      updateDoors();
+      updateDrawers();
+    }
   }, [flag]);
   const [tab_data, setTabData] = useState([]);
   const [activeTab, setActiveTab] = useState();

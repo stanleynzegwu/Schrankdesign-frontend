@@ -141,6 +141,31 @@ const DrawerComponent = React.memo(function DrawerComponent({
     }
   }, [dragStarted]);
 
+  //run when wardrobe height changes. Update all drawers at the top
+  useEffect(() => {
+    furnishingAssets.forEach((asset, index) => {
+      if (
+        asset.type === Config.furnishing.type.drawer ||
+        asset.type === Config.furnishing.type.internalDrawer
+      ) {
+        const topPosition = height - Config.plate.thickness / 2;
+        const assetPosition = asset.position[1] + scale[1] / 2;
+        if (
+          asset.topAsset === "none" &&
+          topPosition - assetPosition < Config.plate.thickness &&
+          !asset.topVisible
+        ) {
+          updateAsset({
+            index,
+            newData: {
+              topVisible: true,
+            },
+          });
+        }
+      }
+    });
+  }, [height]);
+
   const handleDragStart = useCallback(() => {
     setType(type);
     setDrawerHeight(scale[1]);
