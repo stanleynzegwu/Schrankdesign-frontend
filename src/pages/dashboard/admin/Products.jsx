@@ -15,7 +15,7 @@ const Products = () => {
   const location = useLocation();
 
   const [categories, setCategories] = useState([]);
-  const [filteredCategories, setFilteredCategories] = useState([])
+  const [filteredCategories, setFilteredCategories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
@@ -23,16 +23,16 @@ const Products = () => {
   const [selectedDelete, setSelectedDelete] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
-  const [sortName, setSortName] = useState(false)
-  const [categoryShow, setCategoryShow] = useState(false)
-  const [categoryAllCheck, setCategoryAllCheck] = useState(false)
+  const [sortName, setSortName] = useState(false);
+  const [categoryShow, setCategoryShow] = useState(false);
+  const [categoryAllCheck, setCategoryAllCheck] = useState(false);
   const [categoryChecks, setCategoryChecks] = useState([]);
-  const [datePicker, setDatePicker] = useState(false)
-  const [allTimeChecker, setAllTimeChecker] = useState(true)
-  const [fromDate, setFromDate] = useState()
-  const [toDate, setToDate] = useState()
+  const [datePicker, setDatePicker] = useState(false);
+  const [allTimeChecker, setAllTimeChecker] = useState(true);
+  const [fromDate, setFromDate] = useState();
+  const [toDate, setToDate] = useState();
 
-  const [serachKey, setSearchKey] = useState("")
+  const [serachKey, setSearchKey] = useState("");
 
   const getAllCategories = async () => {
     setLoading(true);
@@ -67,26 +67,26 @@ const Products = () => {
     if (categories && products) {
       setCategoryChecks(new Array(categories.length).fill(false));
       setFilteredProducts(products);
-      setFilteredCategories(categories)
+      setFilteredCategories(categories);
     }
-  }, [categories, products])
+  }, [categories, products]);
 
   useEffect(() => {
     if (products.length > 0) {
-      const dates = products.map(product => new Date(product.updatedAt));
+      const dates = products.map((product) => new Date(product.updatedAt));
       const earliest = new Date(Math.min(...dates));
       const latest = new Date(Math.max(...dates));
-      setFromDate(earliest.toISOString().split('T')[0]);
-      setToDate(latest.toISOString().split('T')[0]);
+      setFromDate(earliest.toISOString().split("T")[0]);
+      setToDate(latest.toISOString().split("T")[0]);
     } else {
-      const today = new Date()
-      const year = today.getFullYear()
-      const month = String(today.getMonth() + 1).padStart(2, '0')
-      const day = String(today.getDate()).padStart(2, '0')
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = String(today.getMonth() + 1).padStart(2, "0");
+      const day = String(today.getDate()).padStart(2, "0");
       setFromDate(`${year}-${month}-${day}`);
       setToDate(`${year}-${month}-${day}`);
     }
-  }, [products])
+  }, [products]);
   const handleDeleteCategory = (e) => {
     setDeleteModal(true);
     setSelectedDelete(e);
@@ -163,7 +163,7 @@ const Products = () => {
       default:
         break;
     }
-  }
+  };
 
   const handleCategoryChange = (index) => {
     const updatedChecks = [...categoryChecks];
@@ -178,76 +178,88 @@ const Products = () => {
     //   updatedFilteredCategories.some(category => product.categoryName.includes(category.name))
     // )
     // filterFunction(fromDate, toDate, updatedFilteredCategories)
-    const updatedFilteredProducts = products.filter(product => {
+    const updatedFilteredProducts = products.filter((product) => {
       const productDate = new Date(product.updatedAt);
 
-      const tDate = new Date(toDate)
-      tDate.setDate(tDate.getDate() + 1)
+      const tDate = new Date(toDate);
+      tDate.setDate(tDate.getDate() + 1);
 
-      const inCategory = updatedFilteredCategories.some(category => product.categoryName.includes(category.name));
-      const inDateRange = (!fromDate || productDate > new Date(fromDate)) && (!toDate || productDate < tDate);
+      const inCategory = updatedFilteredCategories.some((category) =>
+        product.categoryName.includes(category.name)
+      );
+      const inDateRange =
+        (!fromDate || productDate > new Date(fromDate)) && (!toDate || productDate < tDate);
       const inSearchKey = product.name.toLowerCase().includes(serachKey.toLowerCase());
       return inCategory && inDateRange && inSearchKey;
     });
-    setFilteredProducts(updatedFilteredProducts)
-    setFilteredCategories(updatedFilteredCategories)
+    setFilteredProducts(updatedFilteredProducts);
+    setFilteredCategories(updatedFilteredCategories);
   };
 
   const handleAllChange = (isChecked) => {
     setCategoryAllCheck(isChecked);
     setCategoryChecks(new Array(categories.length).fill(isChecked));
-    
+
     setFilteredProducts(products);
   };
-  
+
   const handleFilterByDate = (fromDate, toDate) => {
     // filterFunction(fromDate, toDate, filteredCategories)
-    const updatedFilteredProducts = products.filter(product => {
+    const updatedFilteredProducts = products.filter((product) => {
       const productDate = new Date(product.updatedAt);
 
-      const tDate = new Date(toDate)
-      tDate.setDate(tDate.getDate() + 1)
+      const tDate = new Date(toDate);
+      tDate.setDate(tDate.getDate() + 1);
 
-      const inCategory = filteredCategories.some(category => product.categoryName.includes(category.name));
-      const inDateRange = (!fromDate || productDate > new Date(fromDate)) && (!toDate || productDate < tDate);
+      const inCategory = filteredCategories.some((category) =>
+        product.categoryName.includes(category.name)
+      );
+      const inDateRange =
+        (!fromDate || productDate > new Date(fromDate)) && (!toDate || productDate < tDate);
       const inSearchKey = product.name.toLowerCase().includes(serachKey.toLowerCase());
       return inCategory && inDateRange && inSearchKey;
     });
-    setFilteredProducts(updatedFilteredProducts)
-  }
+    setFilteredProducts(updatedFilteredProducts);
+  };
 
   const searchFunction = () => {
     // filterFunction(fromDate, toDate)
-    const updatedFilteredProducts = products.filter(product => {
+    const updatedFilteredProducts = products.filter((product) => {
       const productDate = new Date(product.updatedAt);
 
-      const tDate = new Date(toDate)
-      tDate.setDate(tDate.getDate() + 1)
+      const tDate = new Date(toDate);
+      tDate.setDate(tDate.getDate() + 1);
 
-      const inCategory = filteredCategories.some(category => product.categoryName.includes(category.name));
-      const inDateRange = (!fromDate || productDate > new Date(fromDate)) && (!toDate || productDate < tDate);
+      const inCategory = filteredCategories.some((category) =>
+        product.categoryName.includes(category.name)
+      );
+      const inDateRange =
+        (!fromDate || productDate > new Date(fromDate)) && (!toDate || productDate < tDate);
       const inSearchKey = product.name.toLowerCase().includes(serachKey.toLowerCase());
       return inCategory && inDateRange && inSearchKey;
     });
-    setFilteredProducts(updatedFilteredProducts)
-  }
+    setFilteredProducts(updatedFilteredProducts);
+  };
 
   const filterFunction = (from, to, filteredCategories) => {
-    const fromDate = from ? from : fromDate
-    const toDate = to ? to : toDate
-    const updatedFilteredProducts = products.filter(product => {
+    const fromDate = from ? from : fromDate;
+    const toDate = to ? to : toDate;
+    const updatedFilteredProducts = products.filter((product) => {
       const productDate = new Date(product.updatedAt);
 
-      const tDate = new Date(toDate)
-      tDate.setDate(tDate.getDate() + 1)
+      const tDate = new Date(toDate);
+      tDate.setDate(tDate.getDate() + 1);
 
-      const inCategory = filteredCategories.some(category => product.categoryName.includes(category.name));
-      const inDateRange = (!fromDate || productDate > new Date(fromDate)) && (!toDate || productDate < tDate);
+      const inCategory = filteredCategories.some((category) =>
+        product.categoryName.includes(category.name)
+      );
+      const inDateRange =
+        (!fromDate || productDate > new Date(fromDate)) && (!toDate || productDate < tDate);
       const inSearchKey = product.name.toLowerCase().includes(serachKey.toLowerCase());
       return inCategory && inDateRange && inSearchKey;
     });
-    setFilteredProducts(updatedFilteredProducts)
-  }
+    setFilteredProducts(updatedFilteredProducts);
+  };
   return (
     <Layout>
       {loading && <Loader />}
@@ -266,19 +278,22 @@ const Products = () => {
             <div className="flex">
               <div className="mr-auto flex gap-4 py-2 px-4 bg-[#D9D9D9]">
                 <div className=" flex items-center">
-                  <input className="focus:outline-none h-[30px] border border-black px-2"
+                  <input
+                    className="focus:outline-none h-[30px] border border-black px-2"
                     onChange={(e) => setSearchKey(e.target.value)}
                   ></input>
                 </div>
                 <div>
-                  <button className="bg-[#36695C] rounded-[3px] px-3 md:px-4 hover:px-5 transition-all duration-300 text-[22px] h-[35px] text-[#ffffff]"
+                  <button
+                    className="bg-[#36695C] rounded-[3px] px-3 md:px-4 hover:px-5 transition-all duration-300 text-[22px] h-[35px] text-[#ffffff]"
                     onClick={() => searchFunction()}
                   >
                     Search
                   </button>
                 </div>
                 <div className="relative">
-                  <button className="px-3 md:px-4 hover:px-5 transition-all duration-300 w-32 bg-[#456779] text-[22px] h-[35px] text-[#ffffff]"
+                  <button
+                    className="px-3 md:px-4 hover:px-5 transition-all duration-300 w-32 bg-[#456779] text-[22px] h-[35px] text-[#ffffff]"
                     onClick={() => setCategoryShow(!categoryShow)}
                     onMouseOver={() => setCategoryShow(true)}
                     onMouseOut={() => setCategoryShow(false)}
@@ -286,7 +301,8 @@ const Products = () => {
                     Categorie
                   </button>
                   {categoryShow && (
-                    <div className="origin-top-right absolute mx-auto w-96 -left-32 z-10"
+                    <div
+                      className="origin-top-right absolute mx-auto w-96 -left-32 z-10"
                       onMouseOver={() => setCategoryShow(true)}
                       onMouseOut={() => setCategoryShow(false)}
                     >
@@ -294,7 +310,9 @@ const Products = () => {
                         <div className="absolute top-0 right-1/2 transform translate-x-1/2 w-0 h-0 border-l-8 border-r-8 border-b-8 border-transparent border-b-[#D9D9D9]"></div>
                         <div className="flex items-center">
                           <div className="mx-auto my-2">
-                            <input type="checkbox" className="mr-1"
+                            <input
+                              type="checkbox"
+                              className="mr-1"
                               checked={categoryAllCheck}
                               onChange={(e) => handleAllChange(e.target.checked)}
                             ></input>
@@ -302,28 +320,28 @@ const Products = () => {
                           </div>
                         </div>
                         <div className="grid grid-cols-3 p-4 pt-0">
-                          {categories && (
+                          {categories &&
                             categories.map((category, index) => (
                               <div className="flex items-center">
                                 <div className="my-2">
-                                  <input type="checkbox" className="mr-1"
+                                  <input
+                                    type="checkbox"
+                                    className="mr-1"
                                     checked={categoryChecks[index]}
                                     onChange={(e) => handleCategoryChange(index)}
                                   ></input>
                                 </div>
-                                <div style={{fontSize: '12px'}}>
-                                  {category.name}
-                                </div>
+                                <div style={{ fontSize: "12px" }}>{category.name}</div>
                               </div>
-                            ))
-                          )}
+                            ))}
                         </div>
                       </div>
                     </div>
                   )}
                 </div>
                 <div className="relative">
-                  <button className="px-3 md:px-4 hover:px-5 transition-all duration-300 w-50 bg-[#456779] text-[20px] h-[35px] text-[#ffffff]"
+                  <button
+                    className="px-3 md:px-4 hover:px-5 transition-all duration-300 w-50 bg-[#456779] text-[20px] h-[35px] text-[#ffffff]"
                     onClick={() => setDatePicker(!datePicker)}
                     onMouseOver={() => setDatePicker(true)}
                     onMouseOut={() => setDatePicker(false)}
@@ -331,7 +349,8 @@ const Products = () => {
                     {`${fromDate}-${toDate}`}
                   </button>
                   {datePicker && (
-                    <div className="origin-top-right absolute mx-auto w-96 -left-24 z-10"
+                    <div
+                      className="origin-top-right absolute mx-auto w-96 -left-24 z-10"
                       onMouseOver={() => setDatePicker(true)}
                       onMouseOut={() => setDatePicker(false)}
                     >
@@ -339,33 +358,41 @@ const Products = () => {
                         <div className="absolute top-0 right-1/2 transform translate-x-1/2 w-0 h-0 border-l-8 border-r-8 border-b-8 border-transparent border-b-[#D9D9D9]"></div>
                         <div className="flex items-center">
                           <div className="mx-auto my-2">
-                          <input type="checkbox" className="mr-1"
-                            checked={allTimeChecker}
-                            onChange={(e) => setAllTimeChecker(e.target.checked)}
-                          ></input>
+                            <input
+                              type="checkbox"
+                              className="mr-1"
+                              checked={allTimeChecker}
+                              onChange={(e) => setAllTimeChecker(e.target.checked)}
+                            ></input>
                             All Time
                           </div>
                         </div>
                         <div className="grid grid-cols-2 p-4 pt-0 ">
                           <div className="flex items-center mr-auto">
                             From
-                            <input type="date" datePicker disabled={allTimeChecker}
+                            <input
+                              type="date"
+                              datePicker
+                              disabled={allTimeChecker}
                               className="focus: outline-none px-2 border border-1 w-32 ml-3"
                               value={fromDate}
                               onChange={(e) => {
-                                setFromDate(e.target.value)
-                                handleFilterByDate(e.target.value, toDate)
+                                setFromDate(e.target.value);
+                                handleFilterByDate(e.target.value, toDate);
                               }}
                             ></input>
                           </div>
                           <div className="flex items-center ml-auto">
                             To
-                            <input type="date" datePicker disabled={allTimeChecker}
+                            <input
+                              type="date"
+                              datePicker
+                              disabled={allTimeChecker}
                               className="focus: outline-none px-2 border border-1 w-32 ml-3"
                               value={toDate}
                               onChange={(e) => {
-                                setToDate(e.target.value)
-                                handleFilterByDate(fromDate, e.target.value)
+                                setToDate(e.target.value);
+                                handleFilterByDate(fromDate, e.target.value);
                               }}
                             ></input>
                           </div>
@@ -387,40 +414,60 @@ const Products = () => {
               <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
                 <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                   <tr>
-                    <th scope="col" className="px-6 py-3 cursor-pointer" onClick={() => {
-                        setSortName(!sortName)
-                        productsSort("name")
-                      }}>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 cursor-pointer"
+                      onClick={() => {
+                        setSortName(!sortName);
+                        productsSort("name");
+                      }}
+                    >
                       Name
                     </th>
                     <th scope="col" className="px-6 py-3">
                       Image
                     </th>
-                    <th scope="col" className="px-6 py-3 cursor-pointer" onClick={() => {
-                        setSortName(!sortName)
-                        productsSort("categoryName")
-                      }}>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 cursor-pointer"
+                      onClick={() => {
+                        setSortName(!sortName);
+                        productsSort("categoryName");
+                      }}
+                    >
                       Categorie
                     </th>
                     <th scope="col" className="px-6 py-3">
                       Configuration-Nr
                     </th>
-                    <th scope="col" className="px-6 py-3 cursor-pointer" onClick={() => {
-                        setSortName(!sortName)
-                        productsSort("active")
-                      }}>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 cursor-pointer"
+                      onClick={() => {
+                        setSortName(!sortName);
+                        productsSort("active");
+                      }}
+                    >
                       Active
                     </th>
-                    <th scope="col" className="px-6 py-3 cursor-pointer" onClick={() => {
-                        setSortName(!sortName)
-                        productsSort("saveDate")}
-                      }>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 cursor-pointer"
+                      onClick={() => {
+                        setSortName(!sortName);
+                        productsSort("saveDate");
+                      }}
+                    >
                       Save Date
                     </th>
-                    <th scope="col" className="px-6 py-3 cursor-pointer" onClick={() => {
-                        setSortName(!sortName)
-                        productsSort("price")}
-                      }>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 cursor-pointer"
+                      onClick={() => {
+                        setSortName(!sortName);
+                        productsSort("price");
+                      }}
+                    >
                       Price
                     </th>
                     <th scope="col" className="px-6 py-3">
@@ -451,12 +498,14 @@ const Products = () => {
                             src={item?.defaultImage?.data}
                             alt=""
                             className="w-10 h-10 rounded-full"
-                          /> 
+                          />
                         </td>
                         <td className="px-6 py-4">{item?.categoryName}</td>
                         <td className="px-6 py-4">{item?.configId}</td>
-                        <td className="px-6 py-4">{item?.active ? "Yes" : 'No'}</td>
-                        <td className="px-6 py-4">{item?.updatedAt?.slice(0, item?.updatedAt.indexOf('T'))}</td>
+                        <td className="px-6 py-4">{item?.active ? "Yes" : "No"}</td>
+                        <td className="px-6 py-4">
+                          {item?.updatedAt?.slice(0, item?.updatedAt.indexOf("T"))}
+                        </td>
                         <td className="px-6 py-4">{item?.price}</td>
                         <td className="px-6 py-4 flex gap-2">
                           <Link
@@ -483,17 +532,19 @@ const Products = () => {
                             </button>
                           </Link>
                           <div>
-                            <button className="px-2 py-2 rounded-md bg-[#36695C] text-white :bg-red-700 transition-all duration-300"
+                            <button
+                              className="px-2 py-2 rounded-md bg-[#36695C] text-white :bg-red-700 transition-all duration-300"
                               onClick={async () => {
-                                const configId = item?.configId
-                                const { data, error } = await cloneProduct(configId)
+                                const configId = item?.configId;
+                                const { data, error } = await cloneProduct(configId);
                                 if (data) {
-                                  
                                 } else {
-                                  toast.error("Clone Product Failture!")
+                                  toast.error("Clone Product Failture!");
                                 }
                               }}
-                            >copy</button>
+                            >
+                              copy
+                            </button>
                           </div>
                         </td>
                         <td className="px-6 py-4">
@@ -544,7 +595,10 @@ const Products = () => {
       {/* Modal */}
       {deleteModal && (
         <>
-          <div className="fixed inset-0 flex items-center justify-center z-50" style={{zIndex: 10000000000000000}}>
+          <div
+            className="fixed inset-0 flex items-center justify-center z-50"
+            style={{ zIndex: 10000000000000000 }}
+          >
             <div className="fixed inset-0 bg-black opacity-50"></div>
             <div className="bg-white rounded-lg shadow-lg p-6 h-auto w-[80%] md:w-[60%] lg:w-[40%] 2xl:w-[30%] overflow-y-auto z-50">
               <div className="flex">

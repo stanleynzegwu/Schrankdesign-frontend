@@ -281,8 +281,12 @@ const DrawerComponent = React.memo(function DrawerComponent({
           ? elementsWidths[xIndex] - sideIncident * 2
           : elementsWidths[xIndex] - (panelSpace + panelWidth) * 2;
 
-      // Revert the asset to its previous position in the wardrobe if there is no intersection or if the intersection is with `other`
-      if (!intersects[0] || intersects[0]?.object.name === "other") {
+      // Revert the asset to its previous position in the wardrobe if there is no intersection or if the intersection is with `other` or `occupied`
+      if (
+        !intersects[0] ||
+        intersects[0]?.object.name === "other" ||
+        intersects[0]?.object.name === "occupied"
+      ) {
         return updateAsset({
           index,
           newData: {

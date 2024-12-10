@@ -602,8 +602,7 @@ import { GetConfiguratorData } from "../../api/api";
 import Config from "../config";
 import { GetallDrawer } from "../../Functions-configurator/Function-configurator";
 import TextureOption from "./corner/textureOption";
-
-import { Button } from "@material-tailwind/react";
+import FrontPlateVisibilityToggle from "./corner/frontPlateVisibilityToggle";
 const baseUrl = import.meta.env.VITE_BACKEND_URL_img;
 export default function Wardrobe() {
   const setProductDragging = useDndStore.use.setProductDragging();
@@ -675,10 +674,6 @@ export default function Wardrobe() {
   const setFrontInfo = useColorStore.use.setFrontInfo();
 
   const setDrawerInfo = useColorStore.use.setDrawerInfo();
-
-  //
-  const frontplateVisible = useDndStore.use.frontplateVisible();
-  const setFrontPlateVisible = useDndStore.use.setFrontPlateVisible();
   const initDimentionActive = useDimensionStore.use.initDimentionActive();
   const initDimentionMain = useDimensionStore.use.initDimentionMain();
   const initFurnishing = useFurnishingStore.use.initFurnishing();
@@ -1073,20 +1068,7 @@ export default function Wardrobe() {
         <RatingReview />
         <ViewOption />
         <TextureOption />
-
-        <div className="bg-[#F6F6F6] absolute top-[220px] right-[7px] px-[12px] py-[8px] w-[188px]">
-          <div className="relative gap-2">
-            <Button
-              className={`bg-[#949494] h-[40px] rounded-[2px] mb-1 flex flex-start items-center gap-2 w-full normal-case text-[14px] underline pl-[15px] pr-[9px]`}
-              onClick={() => {
-                setFrontPlateVisible(!frontplateVisible);
-              }}
-            >
-              {/* <img src={settingIcon} className="w-[22px] h-[22px]" alt="Settings" /> */}
-              FrontPlate {frontplateVisible ? "ON" : "OFF"}
-            </Button>
-          </div>
-        </div>
+        <FrontPlateVisibilityToggle />
       </div>
       {/* <Corner /> */}
       <Footer />
