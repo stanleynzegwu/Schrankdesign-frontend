@@ -106,7 +106,7 @@
 //   const setSelectionInfo = useFurnishingStore.use.setSelectionInfo();
 //   const setTotalSpace = useFurnishingStore.use.setTotalSpace();
 //   const setLedAssets = useFurnishingStore.use.setLedAssets();
-//   const setPlatesInfo = useFurnishingStore.use.setPlatesInfo();
+//   const  = useFurnishingStore.use.setPlatesInfo();
 //   const setFurnishingAssets = useFurnishingStore.use.setFurnishingAssets();
 //   const setDoorAssets = useFurnishingStore.use.setDoorAssets();
 //   const setGriffAssets = useFurnishingStore.use.setGriffAssets();

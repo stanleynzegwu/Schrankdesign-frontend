@@ -165,7 +165,6 @@ const DrawerComponent = React.memo(function DrawerComponent({
       }
     });
   }, [height]);
-
   const handleDragStart = useCallback(() => {
     setType(type);
     setDrawerHeight(scale[1]);
@@ -336,7 +335,6 @@ const DrawerComponent = React.memo(function DrawerComponent({
       updateAsset(payload);
 
       /***************** Function Logic: What Happens When topConnected or bottomConnected Is True (Indicating It Is Connected to Another Drawer) **********************************************************/
-
       // Handles removal of the bottom of the topAsset if it's connected with another Drawer
       if (result.topConnected && type === Config.furnishing.type.drawer) {
         // Find the closest asset above `result.posY` directly
@@ -354,7 +352,6 @@ const DrawerComponent = React.memo(function DrawerComponent({
             assetIndex = i;
           }
         }
-
         if (topAsset && topAsset?.type === Config.furnishing.type.drawer) {
           updateAsset({
             index: assetIndex,
@@ -397,7 +394,13 @@ const DrawerComponent = React.memo(function DrawerComponent({
 
       /***************** Function Logic: What Happens When topConnected or bottomConnected Is just becomes false (Indicating It Is Connected to Another Drawer) **********************************************************/
       // Updates the bottomVisible property of the top drawer it was connected to when it is no longer topConnected.
-      if (!asset.topVisible && !topConnected && asset.type === Config.furnishing.type.drawer) {
+      //if (!asset.topVisible && !topConnected && asset.type === Config.furnishing.type.drawer) {
+
+      if (
+        !asset.topVisible &&
+        (!topConnected || ref.current.position.y !== position[1]) &&
+        asset.type === Config.furnishing.type.drawer
+      ) {
         const filteredAssets = furnishingAssets.filter((asset) => {
           return asset.xIndex === xIndex && asset.position[1] > position[1];
         });
@@ -425,7 +428,7 @@ const DrawerComponent = React.memo(function DrawerComponent({
       //Updates the topVisible property of the bottom drawer it was connected to when it is no longer bottomConnected.
       if (
         !asset.bottomVisible &&
-        !bottomConnected &&
+        (!bottomConnected || ref.current.position.y !== position[1]) &&
         asset.type === Config.furnishing.type.drawer
       ) {
         const filteredAssets = furnishingAssets.filter((asset) => {
@@ -522,7 +525,7 @@ const DrawerComponent = React.memo(function DrawerComponent({
       //Updates the bottomVisible property of the top Internal drawer it was connected to when it is no longer topConnected.
       if (
         !asset.topVisible &&
-        !topConnected &&
+        (!topConnected || ref.current.position.y !== position[1]) &&
         asset.type === Config.furnishing.type.internalDrawer
       ) {
         const filteredAssets = furnishingAssets.filter((asset) => {
@@ -554,7 +557,7 @@ const DrawerComponent = React.memo(function DrawerComponent({
       //Updates the topVisible property of the bottom InternalDrawer it was connected to when it is no longer bottomConnected.
       if (
         !asset.bottomVisible &&
-        !bottomConnected &&
+        (!bottomConnected || ref.current.position.y !== position[1]) &&
         asset.type === Config.furnishing.type.internalDrawer
       ) {
         const filteredAssets = furnishingAssets.filter((asset) => {
@@ -653,8 +656,6 @@ const DrawerComponent = React.memo(function DrawerComponent({
 
   const onRemoveObject = useCallback(
     (furnishIndex) => {
-      const { topAsset, bottomAsset, xIndex: currentXindex } = intersects[0].object.userData;
-
       if (!asset.topVisible && asset.type === Config.furnishing.type.drawer) {
         const filteredAssets = furnishingAssets.filter((asset) => {
           return asset.xIndex === xIndex && asset.position[1] > position[1];
@@ -927,6 +928,7 @@ const DrawerComponent = React.memo(function DrawerComponent({
               scale[1] / 2 +
               Config.furnishing.drawer.bottomShelfDistance +
               Config.furnishing.shelf.thickness1 +
+              0.475 +
               0.475,
             position[2],
           ],
