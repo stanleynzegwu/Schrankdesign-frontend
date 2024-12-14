@@ -1,5 +1,4 @@
 import Config from "../../config"
-import { CalcInfo } from "../../../api/api";
 import useCalcStore from "../zustand/calcStore";
 
 const getDefaultScale = (type, drawerHeight, depth) => {
@@ -192,22 +191,26 @@ const getPosZAvailable = (type, depth) => {
 //       break
 //     }
 //   }
+// console.log(depth)
+// console.log(depthRange[index] )
+//   return depthRange[index] // Returns the last depth if no depth found
+// }
 
 const getDrawerDepth = (type, depth) => {
   const calcInfo = useCalcStore.getState().calcInfo.assets;
   if(!calcInfo) return 
   // so I'll get data like this [25, 30, 35, 40, 45, 50, 55, 60], but now not hardcoded but fetched
-        const depthRange = [
-        Number(calcInfo['A_0001'].name.split('-')[2])/10,
-        Number(calcInfo['A_0009'].name.split('-')[2])/10,
-        Number(calcInfo['A_0016'].name.split('-')[2])/10,
-        Number(calcInfo['A_0017'].name.split('-')[2])/10,
-        Number(calcInfo['A_0018'].name.split('-')[2])/10,
-        Number(calcInfo['A_0019'].name.split('-')[2])/10,
-        Number(calcInfo['A_0020'].name.split('-')[2])/10,
-        Number(calcInfo['A_0021'].name.split('-')[2])/10,
-      ]
-
+  const depthRange = [
+    Number(calcInfo['A_0001'].name.split('-')[2])/10,
+    Number(calcInfo['A_0009'].name.split('-')[2])/10,
+    Number(calcInfo['A_0016'].name.split('-')[2])/10,
+    Number(calcInfo['A_0017'].name.split('-')[2])/10,
+    Number(calcInfo['A_0018'].name.split('-')[2])/10,
+    Number(calcInfo['A_0019'].name.split('-')[2])/10,
+    Number(calcInfo['A_0020'].name.split('-')[2])/10,
+    Number(calcInfo['A_0021'].name.split('-')[2])/10,
+  ]
+  //depthRange = type === Config.furnishing.type.internalDrawer ? depthRange.slice(0, -1) : depthRange
   const { backIncident, backThickness } = Config.plate
   const { backSpace } = Config.furnishing.drawer
   const frontInnerSpace =
@@ -225,10 +228,9 @@ const getDrawerDepth = (type, depth) => {
       break
     }
   }
-  
-  return depthRange[index] // Returns the last depth if no depth found
+  // if depthRange[index] is falsy,maybe undefined, return the firstDepth else correct depth
+  return !depthRange[index] ? depthRange[0] : depthRange[index] // Returns the last depth if no depth found
 }
-
 
 const getDraggingInfo = ({
   type,

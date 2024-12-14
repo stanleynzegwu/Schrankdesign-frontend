@@ -104,7 +104,22 @@ const Footer = React.memo(function Footer() {
           depth: bodyScale.back[0],
           thickness: bodyScale.back[2],
         });
+        /********* DRAWER ASSET **************/
+        // Drawer-Runner-[Dynamic] Asset
+        const filteredAsset = Object.entries(calcInfo.assets).find(
+          (value) => value[1].name === `Drawer-runner-${asset.scale[2]}0`
+        );
+        // return in case something happens like maybe name is no longer something like this  `Drawer-runner-${asset.scale[2]}0`
+        // Or scale is smaller
+        if (!filteredAsset?.length) return;
 
+        const rail_ConfigID = filteredAsset[0];
+        if (!drawer_asset_info[rail_ConfigID]) {
+          drawer_asset_info[rail_ConfigID] = 1; // you'll have something like {'A_0009': 1}
+        } else {
+          drawer_asset_info[rail_ConfigID] += 1; // you'll have something like {'A_0016': 3}
+        }
+        /*******************************/
         if (asset.type === Config.furnishing.type.drawer) {
           const outerDrawerScale = getOuterDrawerScale(
             asset.scale,
@@ -168,20 +183,6 @@ const Footer = React.memo(function Footer() {
               depth: outerDrawerScale.bottom[2],
               thickness: outerDrawerScale.bottom[1],
             });
-
-          /****** DRAWER ASSET **************/
-          // Drawer-Runner-[Dynamic] Asset
-          const rail_ConfigID = Object.entries(calcInfo.assets).find(
-            (value) => value[1].name === `Drawer-runner-${asset.scale[2]}0`
-          )[0];
-          if (!rail_ConfigID) return; // return in case something happens like maybe name is no longer something like this  `Drawer-runner-${asset.scale[2]}0`
-
-          if (!drawer_asset_info[rail_ConfigID]) {
-            drawer_asset_info[rail_ConfigID] = 1; // you'll have something like {'A_0009': 1}
-          } else {
-            drawer_asset_info[rail_ConfigID] += 1; // you'll have something like {'A_0016': 3}
-          }
-          /*******************************/
         } else if (asset.type === Config.furnishing.type.internalDrawer) {
           const internalDrawerScale = getInternalDrawerScale(asset.scale, depth);
 
@@ -1303,14 +1304,6 @@ export default Footer;
 //               depth: outerDrawerScale.bottom[2],
 //               thickness: outerDrawerScale.bottom[1],
 //             });
-//           //////////NEW
-//           furnishingPlates.push({
-//             color: "White",
-//             id: "Drawer-Rail",
-//             length: asset.scale[0],
-//             depth: asset.scale[2],
-//             thickness: asset.scale[1],
-//           });
 //         } else if (asset.type === Config.furnishing.type.internalDrawer) {
 //           const internalDrawerScale = getInternalDrawerScale(asset.scale, depth);
 
