@@ -1,4 +1,6 @@
 import Config from "../../config"
+import { CalcInfo } from "../../../api/api";
+import useCalcStore from "../zustand/calcStore";
 
 const getDefaultScale = (type, drawerHeight, depth) => {
   const furnishingConfigs = {
@@ -172,9 +174,42 @@ const getPosZAvailable = (type, depth) => {
   return positionZConfigs[type] || 0
 }
 
+// const getDrawerDepth = (type, depth) => {
+//   const { backIncident, backThickness } = Config.plate
+//   const { backSpace, depthRange } = Config.furnishing.drawer
+//   const frontInnerSpace =
+//     type === Config.furnishing.type.internalDrawer
+//       ? (Config.furnishing.internalDrawer.frontInnerSpace + Config.plate.thickness)
+//       : 0
+
+//   const drawerDepthLimit =
+//     depth - backIncident - backThickness - backSpace - frontInnerSpace
+
+//   let index = depthRange.length - 1
+//   for (let i = 0; i < depthRange.length; i++) {
+//     if (depthRange[i] > drawerDepthLimit) {
+//       index = i - 1
+//       break
+//     }
+//   }
+
 const getDrawerDepth = (type, depth) => {
+  const calcInfo = useCalcStore.getState().calcInfo.assets;
+  if(!calcInfo) return 
+  // so I'll get data like this [25, 30, 35, 40, 45, 50, 55, 60], but now not hardcoded but fetched
+        const depthRange = [
+        Number(calcInfo['A_0001'].name.split('-')[2])/10,
+        Number(calcInfo['A_0009'].name.split('-')[2])/10,
+        Number(calcInfo['A_0016'].name.split('-')[2])/10,
+        Number(calcInfo['A_0017'].name.split('-')[2])/10,
+        Number(calcInfo['A_0018'].name.split('-')[2])/10,
+        Number(calcInfo['A_0019'].name.split('-')[2])/10,
+        Number(calcInfo['A_0020'].name.split('-')[2])/10,
+        Number(calcInfo['A_0021'].name.split('-')[2])/10,
+      ]
+
   const { backIncident, backThickness } = Config.plate
-  const { backSpace, depthRange } = Config.furnishing.drawer
+  const { backSpace } = Config.furnishing.drawer
   const frontInnerSpace =
     type === Config.furnishing.type.internalDrawer
       ? (Config.furnishing.internalDrawer.frontInnerSpace + Config.plate.thickness)
@@ -193,6 +228,7 @@ const getDrawerDepth = (type, depth) => {
   
   return depthRange[index] // Returns the last depth if no depth found
 }
+
 
 const getDraggingInfo = ({
   type,

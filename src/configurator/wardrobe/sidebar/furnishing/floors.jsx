@@ -27,14 +27,14 @@ export default function Floors() {
             // description={`Installation critieria:\nW 15-120 cm | D 30-120cm`}
           />
         )}
-        {shelf.value.glass && (
+        {/* {shelf.value.glass && (
           <ProductCard
             imageUrl="/images/furnishing/Glas shelf.png"
             title="Glasboden"
             type={Config.furnishing.type.glassBottom}
             // description={`Installation critieria:\nW 15-120 cm | D 30-120cm`}
           />
-        )}
+        )} */}
         {shelf.value.shoe && (
           <ProductCard
             imageUrl="/images/furnishing/Shelf for shoes.png"

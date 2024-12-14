@@ -148,8 +148,10 @@ const Config = {
       frontThickness: 1.9,
       bodyFrontIncident: 0.2,
       backHeightDifference: 0.2,
-      depthRange: [26, 31, 36, 41, 46, 51, 56, 61, 66],
-      defaultDepth: 56,
+      // depthRange: [26, 31, 36, 41, 46, 51, 56, 61, 66],
+      depthRange: [25, 30, 35, 40, 45, 50, 55, 60],
+      // defaultDepth: 56,
+      defaultDepth: 55,
       defaultWidth: 55.2,
       defaultHeight: [8, 14, 19, 24], // + 1.9 + 1.9 + 0.7
       heightInterval: 0.3,
