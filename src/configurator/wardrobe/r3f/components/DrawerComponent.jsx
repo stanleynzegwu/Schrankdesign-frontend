@@ -286,6 +286,8 @@ const DrawerComponent = React.memo(function DrawerComponent({
         intersects[0]?.object.name === "other" ||
         intersects[0]?.object.name === "occupied"
       ) {
+        //update positionY for the controls Plane
+        setPlanPositionY(position[1] + 0.0000000000001);
         return updateAsset({
           index,
           newData: {
@@ -1108,23 +1110,23 @@ const DrawerComponent = React.memo(function DrawerComponent({
     >
       <Plane
         args={[scale[0], 25]}
-        position={[
-          position[0],
-          planPositionY == undefined ? position[1] : planPositionY,
-          depth + 3.2,
-        ]}
+        position={[position[0], position[1], depth + 3.2]}
+        // position={[
+        //   position[0],
+        //   planPositionY == undefined ? position[1] : planPositionY,
+        //   depth + 3.2,
+        // ]}
         rotateX={Math.PI / 2}
         visible={false}
         onPointerOver={(e) => {
           e.stopPropagation();
           if (assetDragging) return;
-
           setShowControl(true);
         }}
         onPointerOut={(e) => {
           e.stopPropagation();
           if (assetDragging) return;
-          if (showDimen) return;
+          //if (showDimen) return;
           setShowControl(false);
         }}
       />
@@ -1261,7 +1263,8 @@ const DrawerComponent = React.memo(function DrawerComponent({
                   document.body.style.cursor = "auto";
                 }}
                 onClick={() => onRemoveObject(index)}
-                position={[-scale[0] / 2 + 5, 4.5, depth + 3.21 - position[2]]}
+                // position={[-scale[0] / 2 + 5, 4.5, depth + 3.21 - position[2]]}
+                position={[-scale[0] / 2 + 3, 4.5, depth + 3.21 - position[2]]}
               >
                 <circleGeometry args={[5]} />
                 <meshBasicMaterial map={trashMap} />
@@ -1275,7 +1278,8 @@ const DrawerComponent = React.memo(function DrawerComponent({
                   document.body.style.cursor = "auto";
                 }}
                 onClick={() => onPlusMap()}
-                position={[scale[0] / 2 - 5, 4.5, depth + 3.21 - position[2]]}
+                // position={[scale[0] / 2 - 5, 4.5, depth + 3.21 - position[2]]}
+                position={[scale[0] / 2 - 3, 4.5, depth + 3.21 - position[2]]}
               >
                 <circleGeometry args={[5]} />
                 <meshBasicMaterial map={plusMap} />
@@ -1292,14 +1296,19 @@ const DrawerComponent = React.memo(function DrawerComponent({
                   {!showDimentionControl ? (
                     <div
                       className="w-[60px] bg-white h-[21px] rounded-[6px] cursor-pointer border border-[#36695C] text-center text-[14px] m-auto"
-                      style={{ width: `${scale[0] < 43 ? "30px" : "55px"}` }}
+                      // style={{ width: `${scale[0] < 43 ? "30px" : "55px"}` }}
+                      style={{ width: `${scale[0] < 43 ? "25px" : "45px"}` }}
                       onClick={() => setShowDimensionControl(true)}
                       tabIndex={0}
                       onMouseOver={() => {
                         setShowDimen(true);
                       }}
+                      // onMouseLeave={() => {
+                      //   setShowDimen(false);
+                      // }}
                       onMouseLeave={() => {
                         setShowDimen(false);
+                        setShowControl(false);
                       }}
                     >
                       {scale[0] < 43
