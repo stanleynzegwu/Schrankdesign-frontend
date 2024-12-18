@@ -19,6 +19,8 @@ const useDndStoreBase = create((set) => ({
   currentIndex: null,
   setCurrentIndex: (currentIndex) => set({ currentIndex }),
 
+  activeDrawerAsset: null,
+  setActiveDrawerAsset: (activeDrawerAsset) => set({activeDrawerAsset}),
   setType: (type) => set({ type }),
   setDrawerHeight: (drawerHeight) => set({ drawerHeight }),
   setDrawerTopDistance: (drawerTopDistance) => set({ drawerTopDistance }),
