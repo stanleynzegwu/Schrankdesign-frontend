@@ -346,7 +346,11 @@ const ShelfComponent = React.memo(function ShelfComponent({
     // If the asset intersects with the "other" object or if there is no intersection; indicating it's outside the wardrobe,
     // Then, update the asset's position to its previous position with a very tiny , negligible offset
     // to the Y-axis to trigger action and move it back.
-    if (!intersects[0] || intersects[0]?.object.name === "other") {
+    if (
+      !intersects[0] ||
+      intersects[0]?.object.name === "other" ||
+      intersects[0]?.object.name === "occupied"
+    ) {
       setAssetDragging(false);
       positionsRef.current = {};
       setCurrentIndex(null);

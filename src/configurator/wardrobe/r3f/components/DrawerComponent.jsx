@@ -3047,12 +3047,12 @@ const DrawerComponent = React.memo(function DrawerComponent({
 
   const handleDrag = useCallback(
     (state) => {
+      state.event.stopPropagation();
       if (state.delta[0] === 0 && state.delta[1] === 0) return;
       document.body.style.cursor = "grabbing";
 
       ///setDragStarted(false);
       setShowMeasure(true);
-      setShowControl(false);
 
       pointer.x = ((state.values[0] - size.left) / size.width) * 2 - 1;
       pointer.y = -((state.values[1] - size.top) / size.height) * 2 + 1;
@@ -3098,16 +3098,6 @@ const DrawerComponent = React.memo(function DrawerComponent({
           });
         }
 
-        // if (asset.topVisible !== drawerTopVisible || asset.bottomVisible !== drawerBottomVisible) {
-        //   updateAsset({
-        //     index,
-        //     newData: {
-        //       topVisible: drawerTopVisible,
-        //       bottomVisible: drawerBottomVisible,
-        //     },
-        //   });
-        // }
-
         const tempMeasureInfo = {
           posX: intersects[0].object.position.x,
           aboveTop: availableTop,
@@ -3135,7 +3125,7 @@ const DrawerComponent = React.memo(function DrawerComponent({
           depth + depth / 2
         );
 
-        setShowMeasure(false);
+        //setShowMeasure(false);
       }
     },
     [spaceRef, ref, allfurnishing, scale, measureInfo, hanging, withFeet]
@@ -3192,6 +3182,19 @@ const DrawerComponent = React.memo(function DrawerComponent({
           ? false
           : true;
 
+      /******** I ADDED THIS CHECK BECAUSE OF THE EDGE-CASE OF USE-GESTURE `stopPropagation` **************************************/
+      // because of some cases where you can unintentionally drag more than one drawer asset at the same time because of thier close proximity
+      // I added `state.event.stopPropagation` in handleDrag function, which now prevents the close drawer from being dragged aswell
+      // Now comes the edgecase/gotcha when you drag a drawer, even though the close drawer is not also visibly dragged
+      // But it gets updated in the handleDragend, which makes it that even though the drawer is visibly where it was, but it has been updated
+      // And now you will see the bug of empty unavailable space even though no asset there
+      //console.log(`positionX - ${position[0]}, refPosX- ${ref.current.position.x} `);
+      const isSamePosX = position[0] === ref.current.position.x;
+      const isSamePosY = position[1] === ref.current.position.y;
+      //console.log(isSamePosX && isSamePosY);
+      //if positionX(xIndex) and positionY is unchanged return. Because it's not the dragged asset and does not need payload updated
+      if (isSamePosX && isSamePosY) return;
+      /**************************************************************************************************************************/
       const payload = {
         index,
         newData: {
@@ -3479,8 +3482,8 @@ const DrawerComponent = React.memo(function DrawerComponent({
       enabled: viewOption === Config.view.front,
       // Sets a drag threshold of 1px to distinguish between click and drag actions,
       // ensuring drag handlers only trigger after the user moves at least 1px.
-      //drag: { threshold: 5 },
-      drag: { filterTaps: true },
+      drag: { threshold: 1 },
+      //drag: { filterTaps: true },
     }
   );
 
